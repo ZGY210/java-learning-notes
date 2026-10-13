@@ -27,7 +27,7 @@ Write-Host ""
 
 # ---------- 第 1 步：确认本地有提交 ----------
 Write-Host "[1/4] 检查本地提交 ..." -ForegroundColor Yellow
-$log = git log --oneline -1 2>&1
+$log = (cmd /c "git log --oneline -1 2>&1") -join "`n"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  找不到任何提交。先确认你在正确的目录里。" -ForegroundColor Red
     exit 1
@@ -48,7 +48,7 @@ Write-Host ""
 
 # ---------- 第 3 步：先测试 SSH 能不能连上 ----------
 Write-Host "[3/4] 测试与 GitHub 的 SSH 连接 ..." -ForegroundColor Yellow
-$sshOut = ssh -T -o ConnectTimeout=10 git@github.com 2>&1 | Out-String
+$sshOut = (cmd /c "ssh -T -o ConnectTimeout=10 git@github.com 2>&1") -join "`n"
 if ($sshOut -match 'successfully authenticated') {
     Write-Host "  SSH 认证成功" -ForegroundColor Green
     if ($sshOut -match 'Hi (\S+?)!') {
@@ -69,7 +69,9 @@ Write-Host ""
 
 # ---------- 第 4 步：推送 ----------
 Write-Host "[4/4] 推送 main 分支 ..." -ForegroundColor Yellow
-$pushOut  = git push -u origin main 2>&1 | Out-String
+# 用 cmd /c 捕获输出：git 把进度信息写到 stderr，若用 PowerShell 的 2>&1 管道，
+# 即便推送成功也会渲染成一片红色 NativeCommandError，看起来像失败。
+$pushOut  = (cmd /c "git push -u origin main 2>&1") -join "`n"
 $pushCode = $LASTEXITCODE
 Write-Host $pushOut
 
