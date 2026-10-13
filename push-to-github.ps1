@@ -65,10 +65,13 @@ git push -u origin main 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
     Write-Host "  推送失败。最常见的两种原因：" -ForegroundColor Red
-    Write-Host "  A. 远程仓库还不存在 -> 先去建（不要勾 README / .gitignore / license）："
-    Write-Host "     https://github.com/new?name=java-learning-notes&visibility=public"
-    Write-Host "  B. 远程已是 master 分支而我们推 main -> 在 GitHub 仓库 Settings 里"
-    Write-Host "     把默认分支改成 main，或者执行： git push -u origin main:master"
+    Write-Host "  A. 远程仓库还不存在 -> 先去建（不要勾 README / .gitignore / license）：" -ForegroundColor Red
+    Write-Host "     打开 https://github.com/new，仓库名填 java-learning-notes"
+    Write-Host "     可见性选 Public，其余三个勾选项一律不勾，然后 Create repository"
+    Write-Host "  B. 远程已存在且默认分支是 master（我们本地是 main）："
+    Write-Host "     两种解法任选其一——"
+    Write-Host "     解法 1（推荐）：进 GitHub 仓库 Settings -> Branches，把默认分支改成 main"
+    Write-Host "     解法 2：直接推成 master： git push -u origin main:master"
     exit 1
 }
 
