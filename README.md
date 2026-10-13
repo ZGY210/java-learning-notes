@@ -60,6 +60,7 @@ p1-javase/
 ├── pom.xml                  # Maven 坐标与编译配置（release 17）
 ├── mvn-local.cmd            # 复用 IDEA 自带 Maven，无需单独安装
 ├── verify.cmd               # 一键编译 + 跑全部自测（每天 commit 前跑）
+├── push-to-github.ps1       # 首次推送 + 失败分类排查（必须存为 UTF-8 带 BOM，见文末）
 └── src/main/java/
     ├── api/                 # 常用 API 练习
     │   ├── RegexUtil.java       # 正则：校验 / 提取 / 分组 / 脱敏
@@ -151,6 +152,27 @@ mvn-local.cmd test               # 跑单元测试（接入 JUnit 后）
 | 日期 | 投入 | 内容 |
 | --- | --- | --- |
 | 2026-10-14 | 2.5 h | 正则 / BigDecimal / 日期时间三个工具类 + MyArrayList 补 modCount，30 项自测全绿 |
+
+---
+
+## 踩过的坑（写下来，防止再犯）
+
+### 1. `.ps1` 文件没有 BOM，脚本被「打印」而不是被「执行」
+
+**症状**：运行 `push-to-github.ps1`，终端里刷出一堆乱码，比如 `閽ュ彛 €?java-learning-notes`，而且能看见 `Write-Host` 本身被当成普通文本输出，脚本根本没跑完。
+
+**原因**：Windows PowerShell **5.1** 读取不带 BOM 的 `.ps1` 时，会按系统 ANSI 编码（中文系统 = GBK）解码。文件其实是 UTF-8，于是中文变乱码；更致命的是乱码字节里混进了 `"` `'` 之类的字符，**把引号配对搞坏，整个脚本解析失败**，PowerShell 就把剩下的内容原样打出来。
+
+**解法**：把 `push-to-github.ps1` 存为 **UTF-8 带 BOM**。BOM 是文件开头的三个字节 `EF BB BF`，PowerShell 5.1 和 7 都能靠它正确识别编码。
+
+**怎么检查**：在 PowerShell 里执行
+
+```powershell
+$b = [System.IO.File]::ReadAllBytes(".\push-to-github.ps1")
+if ($b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF) { "有 BOM，正常" } else { "缺 BOM，要重存" }
+```
+
+**注意**：用编辑器或脚本改动这个文件后，BOM 可能会被去掉，改完要重新检查一次。`.cmd` 文件不受影响（`verify.cmd`、`mvn-local.cmd` 全部是纯 ASCII，没有中文）。
 
 ---
 

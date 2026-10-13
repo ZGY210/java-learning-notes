@@ -12,7 +12,7 @@
 #
 #  重要：本文件必须保存为「UTF-8 带 BOM」。
 #  Windows PowerShell 5.1 在没有 BOM 时会按系统 ANSI(GBK) 解码 .ps1，
-#  中文会变乱码并破坏语法，症状就是命令被打印出来却不执行。
+#  中文会变乱码并破坏引号配对，症状是命令被原样打印出来却不执行。
 # ============================================================
 
 $ErrorActionPreference = 'Continue'
@@ -69,28 +69,72 @@ Write-Host ""
 
 # ---------- 第 4 步：推送 ----------
 Write-Host "[4/4] 推送 main 分支 ..." -ForegroundColor Yellow
-git push -u origin main 2>&1
-if ($LASTEXITCODE -ne 0) {
+$pushOut  = git push -u origin main 2>&1 | Out-String
+$pushCode = $LASTEXITCODE
+Write-Host $pushOut
+
+if ($pushCode -eq 0) {
+    Write-Host "==============================================" -ForegroundColor Green
+    Write-Host "  推送成功" -ForegroundColor Green
+    Write-Host "  仓库地址：https://github.com/ZGY210/java-learning-notes" -ForegroundColor Green
+    Write-Host "==============================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "  推送失败。最常见的两种原因：" -ForegroundColor Red
-    Write-Host "  A. 远程仓库还不存在。先去新建：https://github.com/new"
-    Write-Host "     仓库名填 java-learning-notes，可见性选 Public，"
-    Write-Host "     下面三个勾选项（README / .gitignore / license）一个都不要勾。"
-    Write-Host "  B. 远程已存在且默认分支是 master（我们本地是 main）："
-    Write-Host "     解法 1（推荐）：进 GitHub 仓库 Settings -> Branches，把默认分支改成 main"
-    Write-Host "     解法 2：直接推成 master： git push -u origin main:master"
-    exit 1
+    Write-Host "以后每天收工时的固定动作：" -ForegroundColor Cyan
+    Write-Host "    .\verify.cmd"
+    Write-Host "    git add -A"
+    Write-Host '    git commit -m "feat: 今天做了什么"'
+    Write-Host "    git push"
+    exit 0
 }
 
+# 失败时按真实错误分类给出解法（旧版只会一律说「仓库不存在」，会误导）
+Write-Host "==============================================" -ForegroundColor Red
+Write-Host "  推送失败，请对照下面的原因处理" -ForegroundColor Red
+Write-Host "==============================================" -ForegroundColor Red
 Write-Host ""
-Write-Host "==============================================" -ForegroundColor Green
-Write-Host "  推送成功" -ForegroundColor Green
-Write-Host "  仓库地址：https://github.com/ZGY210/java-learning-notes" -ForegroundColor Green
-Write-Host "==============================================" -ForegroundColor Green
-Write-Host ""
-Write-Host "以后每天收工时的固定动作：" -ForegroundColor Cyan
-Write-Host "    .\verify.cmd"
-Write-Host "    git add -A"
-$commitDemo = '    git commit -m "feat: 今天做了什么"'
-Write-Host $commitDemo
-Write-Host "    git push"
+
+# 注意：git 在多种失败下都会打 "Could not read from remote repository"，这是通病提示，
+# 不能用来判断原因。所以先匹配最具体的特征串，原因看输出里的第一行。
+if ($pushOut -match 'couldn''t create signal pipe|Win32 error 5') {
+    Write-Host "原因：当前终端跑在受限沙箱里，git 内部的 sh.exe 无法创建管道。" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "解法：换一个普通的 PowerShell 窗口重跑本脚本。" -ForegroundColor Cyan
+    Write-Host "     （这是沙箱环境特有的限制，正常终端不会出现。）"
+}
+elseif ($pushOut -match 'Permission denied \(publickey\)|Permission denied \(') {
+    Write-Host "原因：SSH 密钥认证被拒。" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "解法：" -ForegroundColor Cyan
+    Write-Host "    1) 浏览器打开 https://github.com/settings/keys 确认公钥已添加，"
+    Write-Host "       本机公钥（复制下面这一整行）："
+    Get-Content "$env:USERPROFILE\.ssh\id_ed25519_github.pub" -ErrorAction SilentlyContinue
+    Write-Host "    2) 确认 ~/.ssh/config 里 github.com 走的是 443 端口。"
+}
+elseif ($pushOut -match 'non-fast-forward|fetch first|Updates were rejected|\[rejected\]') {
+    Write-Host "原因：远程仓库里已经有提交（例如建仓库时勾了 Add a README），" -ForegroundColor Yellow
+    Write-Host "      本地和远程是两条不相干的历史，Git 拒绝了这次推送。" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "解法（推荐，保留远程那个 README）：" -ForegroundColor Cyan
+    Write-Host "    git pull --rebase origin main"
+    Write-Host "    git push -u origin main"
+    Write-Host ""
+    Write-Host "解法（远程那个 README 不要了，直接覆盖）：" -ForegroundColor Cyan
+    Write-Host "    git push -u origin main --force"
+    Write-Host "    仓库是你自己的、刚建的，force 覆盖没有风险。"
+}
+elseif ($pushOut -match 'Repository not found|does not appear to be a git repository') {
+    Write-Host "原因：GitHub 上找不到这个仓库，或者地址写错了。" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "解法：" -ForegroundColor Cyan
+    Write-Host "    1) 浏览器打开 https://github.com/ZGY210/java-learning-notes"
+    Write-Host "       如果 404 -> 去 https://github.com/new 新建，"
+    Write-Host "       名字填 java-learning-notes，选 Public，三个勾选项都不要勾。"
+    Write-Host "    2) 新建后回到这里重新运行本脚本。"
+}
+else {
+    Write-Host "没有匹配到已知的错误模式，完整输出见上方。" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "把上面这段输出原样贴给我，我帮你定位。" -ForegroundColor Cyan
+}
+
+exit 1
