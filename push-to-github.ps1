@@ -84,5 +84,5 @@ Write-Host ""
 Write-Host "以后每天收工时的固定三连：" -ForegroundColor Cyan
 Write-Host "    .\verify.cmd"
 Write-Host "    git add -A"
-Write-Host "    git commit -m `"feat: 今天做了什么`""
+Write-Host '    git commit -m "feat: 今天做了什么"'
 Write-Host "    git push"
