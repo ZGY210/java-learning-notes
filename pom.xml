@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.zgy</groupId>
+  <artifactId>p1-javase</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>p1-javase</name>
+  <description>Java SE 阶段练习与验收代码（2026-10-14 起）</description>
+
+  <properties>
+    <!--
+      为什么是 17 而不是 21：
+      本机 JDK 是 21，但课程按 17 讲，且企业主流（含后面的 Spring Boot 3.2）锁 17。
+      maven.compiler.release=17 让编译器按 Java 17 的语法和 API 校验代码，
+      用 JDK 21 编译完全没问题，同时还逼你避开 21 独有 API，保证项目一能平滑升级。
+    -->
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <dependencies>
+    <!-- JUnit 5：从 2027-02-23「补单元测试」那天起正式用，现在先备好 -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!--
+      以下两个依赖现在【注释掉】，用到的那天再解开（那时网络必须已恢复）：
+      解开前先确认能连上 maven.aliyun.com，否则 mvn 会卡在下载。
+
+      hutool：12/12（hutool 造假数据）、1/12（项目二文档解析）
+      <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+        <version>5.8.27</version>
+      </dependency>
+    -->
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,25 @@
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+out/
+
+### Maven ###
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+### Java ###
+*.class
+*.jar
+*.war
+*.log
+hs_err_pid*
+replay_pid*
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### 本地私有（不上传的东西） ###
+local/
+*.local
