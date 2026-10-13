@@ -56,23 +56,42 @@
 ## 目录结构
 
 ```
-p1-javase/
-├── pom.xml                  # Maven 坐标与编译配置（release 17）
-├── mvn-local.cmd            # 复用 IDEA 自带 Maven，无需单独安装
-├── verify.cmd               # 一键编译 + 跑全部自测（每天 commit 前跑）
-├── push-to-github.ps1       # 首次推送 + 失败分类排查（必须存为 UTF-8 带 BOM，见文末）
+java-learning-notes/                       ← 本仓库根目录
+├── README.md                  # 你正在看的这一页
+├── .gitignore
+│
+├── notes/                     # 📓 笔记：每个知识点用自己的话写一遍
+│   ├── README.md                  # 笔记骨架（三问内核）+ 命名约定
+│   ├── 待补-知识漏洞.md            # ⭐ 闭卷答不出来的点，考前只看这一页
+│   ├── collections/               # 集合框架
+│   └── java-basics/               # 面向对象 / String / 异常 / IO / 泛型 / 反射
+│
+├── journal/                   # 📅 日志：每天 3 行 + 每周复盘
+│   ├── README.md                  # 为什么这个目录对求职最重要
+│   └── 2026-10-13-D1.md           # 每日一篇
+│
+├── leetcode/                  # 🧩 题解：命名 0001-两数之和.md
+│   ├── README.md                  # 60 题进度表 + 三条铁律
+│   └── _模板.md                   # 五段式题解模板
+│
+├── pom.xml                    # Maven 坐标与编译配置（release 17）
+├── mvn-local.cmd              # 复用 IDEA 自带 Maven，无需单独安装
+├── verify.cmd                 # 一键编译 + 跑全部自测（每天 commit 前跑）
+├── push-to-github.ps1         # 首次推送 + 失败分类排查（必须存为 UTF-8 带 BOM，见文末）
 └── src/main/java/
-    ├── api/                 # 常用 API 练习
-    │   ├── RegexUtil.java       # 正则：校验 / 提取 / 分组 / 脱敏
-    │   ├── MoneyUtil.java       # BigDecimal 金额计算与分摊
-    │   └── DateUtil.java        # java.time、时区换算、线程安全对比实验
+    ├── api/                   # 常用 API 练习
+    │   ├── RegexUtil.java         # 正则：校验 / 提取 / 分组 / 脱敏
+    │   ├── MoneyUtil.java         # BigDecimal 金额计算与分摊
+    │   └── DateUtil.java          # java.time、时区换算、线程安全对比实验
     └── practice/
-        └── mycollection/    # 手写集合框架
-            ├── MyArrayList.java      # 手写 ArrayList（1.5 倍扩容 + fail-fast）
-            └── MyArrayListTest.java  # 30 项自测，全绿才算过关
+        └── mycollection/      # 手写集合框架
+            ├── MyArrayList.java        # 手写 ArrayList（1.5 倍扩容 + fail-fast）
+            └── MyArrayListTest.java    # 30 项自测，全绿才算过关
 ```
 
-后续会新增 `collections/`、`io/`、`thread/`、`reflect/`、`leetcode/` 等包。
+> **「代码 + 笔记 + 日志 + 题解」四合一**是刻意的：面试官点开这个仓库，能看到的不只是代码，而是一条**持续 12 个月、每天都有痕迹的证据链**。对双非学生来说，这条链比学历更能说明问题。
+>
+> 后续会新增 `src/main/java/` 下的 `io/`、`thread/`、`reflect/` 等包，以及 P2 起的 Spring Boot 项目。
 
 ---
 
