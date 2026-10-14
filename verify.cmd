@@ -50,13 +50,13 @@ if errorlevel 1 (
 )
 echo.
 
-echo [3/4] api.DateUtil demo ...
-java -Dstdout.encoding=UTF-8 -cp "%OUT%" api.DateUtil
+echo [3/4] reference.DateUtil demo ...
+java -Dstdout.encoding=UTF-8 -cp "%OUT%" reference.DateUtil
 if errorlevel 1 goto :failed
 echo.
 
-echo [4/4] api.MoneyUtil demo ...
-java -Dstdout.encoding=UTF-8 -cp "%OUT%" api.MoneyUtil
+echo [4/4] reference.MoneyUtil demo ...
+java -Dstdout.encoding=UTF-8 -cp "%OUT%" reference.MoneyUtil
 if errorlevel 1 goto :failed
 echo.
 

@@ -1,7 +1,6 @@
-# java-basics/01-BigInteger-BigDecimal-「为什么算钱不能用 double」
+# 01 · BigDecimal 为什么不能用来算钱
 
-> 复制本文件，改名为 `主题-知识点.md`，存到对应目录（`java-basics/` `collections/` `concurrency/` `jvm/`）。
-> **每篇笔记只回答三个问题**，答不出来就回去看视频那一段。
+> 归属 `notes/java-basics/` ｜ 写于 2026-10-14 ｜ 对应黑马 161（BigInteger）、162（BigDecimal）
 
 ## 一、它是什么
 
@@ -21,7 +20,7 @@
 >
 > 坑:
 >
-> 1.用double构造BigDecimal,如:BigDecimal bd = nawBigDecimal(double);
+> 1.用double构造BigDecimal,如:BigDecimal bd = new BigDecimal(double 值);
 >
 > 2.使用除法时不指定精度,舍入乱选;
 
