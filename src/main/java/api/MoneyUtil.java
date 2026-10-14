@@ -16,7 +16,11 @@ import java.math.RoundingMode;
  *   <li>比较大小时用 compareTo，不要用 equals —— 1.0 和 1.00 的 equals 是 false。</li>
  * </ol>
  *
- * @author 学员自写（2026-10-14）
+ * <p>⚠️ 本文件是【参考答案】，由教练预先写好。规则：**先关掉它、从空白文件自己写一遍**，
+ * 写完再回来对照 —— 看懂的 ≠ 会写的 ≠ 面试能讲的。对照时重点看第 3 条铁律的
+ * 代码落地位置（{@link #yuanToFen(double)} 里那个 {@code Double.toString}）。</p>
+ *
+ * @author 教练（参考答案，2026-10-14）
  */
 public class MoneyUtil {
 
