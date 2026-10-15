@@ -1,6 +1,6 @@
 # 0001. 两数之和（简单）
 
-链接：https://leetcode.cn/problems/xxx/
+链接：https://leetcode.cn/problems/two-sum/
 
 ---
 
