@@ -36,7 +36,7 @@ public class RegexUtil {
      * </pre>
      */
     public static boolean isPhone(String phone) {
-        throw new UnsupportedOperationException("TODO 1");
+        return phone.matches("1[3-9]\\d{9}");
     }
 
     /**
@@ -48,7 +48,7 @@ public class RegexUtil {
      * </pre>
      */
     public static boolean isEmail(String email) {
-        throw new UnsupportedOperationException("TODO 2");
+        return email.matches("[\\w._%+-]+@[\\w&&[^_]]+\\.[a-zA-Z]{2,3}");
     }
 
     /**
@@ -61,7 +61,7 @@ public class RegexUtil {
      * 注意：这里只校验格式，不算校验位（校验位是加权求和 mod 11，项目一里再学）。
      */
     public static boolean isIdCard(String idCard) {
-        throw new UnsupportedOperationException("TODO 3");
+        return idCard.matches("1[0-9]{16}[0-9X]");
     }
 
     // ==================================================================
