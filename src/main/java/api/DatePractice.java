@@ -22,6 +22,7 @@ public class DatePractice {
     // TODO 0：在这里建一个 SimpleDateFormat 常量
     //   提示：private static final SimpleDateFormat SDF = new SimpleDateFormat(PATTERN);
     //   想一想：写成 static final 和每次方法里 new 一个，有区别吗？（明天的线程安全实验会回答）
+    private static final SimpleDateFormat SDF = new SimpleDateFormat(PATTERN);
 
     private DatePractice() {
         // 工具类不实例化
@@ -34,7 +35,7 @@ public class DatePractice {
      * </pre>
      */
     public static Date parse(String text) throws Exception {
-        throw new UnsupportedOperationException("TODO 1");
+        return SDF.parse(text);
     }
 
     /**
@@ -44,21 +45,21 @@ public class DatePractice {
      * </pre>
      */
     public static String format(Date date) {
-        throw new UnsupportedOperationException("TODO 2");
+        return SDF.format(date);
     }
 
     /**
      * Date → 毫秒时间戳。提示：Date 有一个 get 开头的无参方法。
      */
     public static long toMillis(Date date) {
-        throw new UnsupportedOperationException("TODO 3");
+        return date.getTime();
     }
 
     /**
      * 毫秒时间戳 → Date。提示：Date 有一个接收 long 的构造器。
      */
     public static Date fromMillis(long millis) {
-        throw new UnsupportedOperationException("TODO 4");
+        return  new Date(millis);
     }
 
     // ==================================================================
