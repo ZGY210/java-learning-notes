@@ -6,36 +6,41 @@ package api;
  * 对应黑马 174 包装类（38:09，标注「必」）。
  * 这一节面试极易被偷袭，全是「== 」判断。每个实验先写预期，再看结果，最后把原因写进注释。
  *
- * ⚠️ 本文件是教练生成的骨架（2026-10-19/20）。3 个方法体全部由你实现。
+ * ⚠️ 本文件是教练生成的骨架（2026-10-19）。2 个方法体全部由你实现。
  */
 public class BoxingDemo {
 
-    // TODO 0（先到这里，做 ① 实验）：
-    //    写一个 main，把下面的实验 1~4 各打印一行。先猜结果，再运行。
-
-    // 实验 1：Integer a = 100; Integer b = 100; System.out.println(a == b);   // 你预期？
-    // 实验 2：Integer a = 200; Integer b = 200; System.out.println(a == b);   // 预期？和上面一样吗？
-    // 实验 3：Integer a = new Integer(100); Integer b = new Integer(100); System.out.println(a == b);  // 预期？
-    // 实验 4：Integer a = 100; Integer b = 1000; System.out.println(a.equals(b));  // 预期？
+    private BoxingDemo() {
+        // 工具类不实例化
+    }
 
     /**
-     * 现象解释 · 为什么 128 和 127 不一样（Integer 缓存）。
+     * 判断 n 是否落在 Integer 缓存的区间。
+     * Integer.valueOf(n) 在缓存区间内返回同一个对象，之外 new。
      *
-     * @return "Integer Cache = -128 ~ 127；在这区间 valueOf 返回同一对象；之外 new"
+     * <pre>
+     * isCached(100)   == true    （缓存区间内）
+     * isCached(200)   == false   （超出缓存）
+     * isCached(-128)  == true
+     * isCached(127)   == true
+     * isCached(128)   == false
+     * </pre>
      */
-    public static String whyIntegerCache(int n) {
-        // 实现：Integer n 装箱时（Integer.valueOf(n)），若 -128 <= n <= 127 用缓存；否则新建
-        // 这一段的精髓是：== 比的是引用地址，不是值
+    public static boolean isCached(int n) {
         throw new UnsupportedOperationException("TODO 1");
     }
 
     /**
-     * 现象解释 · 拆箱 NPE。
-     * 要求：写一个方法，输入 Integer，返回 int；若抛异常就把异常信息作为返回值的一部分返回
+     * 演示拆箱 NPE：输入一个可能为 null 的 Integer，尝试转成 int。
+     * 若 n 为 null，返回 true（抛了 NPE）；否则正常拆箱返回 false。
      */
-    public static int unboxNpe(Integer n) {
-        // 实现：直接 return n; 当 n 为 null 时会抛 NullPointerException（拆箱自动调 n.intValue()）
-        throw new UnsupportedOperationException("TODO 2");
+    public static boolean unboxNullThrows(Integer n) {
+        try {
+            int v = n.intValue();   // 拆箱核心：n.intValue()
+            return v == 0;          // 走到这说明没抛 NPE，正常返回
+        } catch (NullPointerException e) {
+            return true;            // 说明确实抛了 NPE
+        }
     }
 
     // ==================================================================
@@ -56,28 +61,21 @@ public class BoxingDemo {
     public static void main(String[] args) {
         System.out.println("===== BoxingDemo 8 条自查 =====\n");
 
-        // 缓存实验    先自己写下预期，再看结果
-        check("1. 100==100 (缓存)", Boolean.FALSE.equals((Integer) 100 == (Integer) 100), true);
-        check("2. 200==200 (超缓存)", Boolean.FALSE.equals((Integer) 200 == (Integer) 200), false);
-        check("3. new Integer(100)==new Integer(100)", Boolean.FALSE.equals(new Integer(100) == new Integer(100)), false);
-        check("4. equals 比较值", new Integer(100).equals(new Integer(100)), true);
+        // 缓存区间：先自己写下预期，再看结果
+        check("1. isCached(100)=true", isCached(100), true);
+        check("2. isCached(200)=false", isCached(200), false);
+        check("3. isCached(-128)=true", isCached(-128), true);
+        check("4. isCached(128)=false", isCached(128), false);
 
-        // 拆箱
-        try {
-            unboxNpe(null);
-            check("5. unbox(null) 抛 NPE", false, true);
-        } catch (NullPointerException e) {
-            check("5. unbox(null) 抛 NPE", true, true);
-        }
+        // 拆箱 NPE
+        check("5. unboxNull(null)=抛NPE", unboxNullThrows(null), true);
+        check("6. unboxNull(100)=无NPE", unboxNullThrows(100), false);
 
-        // 自动装箱/拆箱混合
-        Integer big = 300;
-        check("6. big.intValue()", big.intValue(), 300);
-        int sum = big + 1;  // 自动拆箱
-        check("7. sum=301", sum, 301);
-
-        // toString
-        check("8. Integer.toString", Integer.toString(256), "256");
+        // == 原理（直观演示，结果都是 boolean，直接 assert）
+        Integer a1 = 100, b1 = 100;
+        check("7. 100==100（缓存同一对象）", a1 == b1, true);
+        Integer a2 = 200, b2 = 200;
+        check("8. 200==200（超缓存不同对象）", a2 == b2, false);
 
         System.out.println();
         System.out.println(failed == 0
