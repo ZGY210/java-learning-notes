@@ -127,7 +127,7 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println("===== DateUtil 12 条自查 =====\n");
+        System.out.println("===== DateUtil 11 条自查 =====\n");
 
         // 1-4 格式化与解析
         check("1. parseDateTime 月日", parseDateTime("2026-10-18 09:30:00").getMonthValue(), 10);
