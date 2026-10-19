@@ -3,7 +3,9 @@ package api;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 /**
  * DateUtil —— JDK8 新时间 API 工具（学员自写版）
@@ -44,8 +46,8 @@ public class DateUtil {
      * </pre>
      * 提示：LocalDateTime.parse(text, DATE_TIME_FORMATTER)
      */
-    public static LocalDateTime parseDateTime(String text) {
-        throw new UnsupportedOperationException("TODO 1");
+    public static LocalDateTime parseDateTime(String text){
+        return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
     }
 
     /**
@@ -55,7 +57,7 @@ public class DateUtil {
      * </pre>
      */
     public static String format(LocalDateTime dateTime) {
-        throw new UnsupportedOperationException("TODO 2");
+        return dateTime == null ? null : dateTime.format(DATE_TIME_FORMATTER);
     }
 
     /**
@@ -66,14 +68,14 @@ public class DateUtil {
      * 提示：LocalDate.parse(text, DATE_FORMATTER)
      */
     public static LocalDate parseDate(String text) {
-        throw new UnsupportedOperationException("TODO 3");
+        return LocalDate.parse(text, DATE_FORMATTER);
     }
 
     /**
      * LocalDate → 字符串（yyyy-MM-dd）。入参为 null 时返回 null。
      */
     public static String formatDate(LocalDate date) {
-        throw new UnsupportedOperationException("TODO 4");
+        return date == null ? null : date.format(DATE_FORMATTER);
     }
 
     /**
@@ -85,7 +87,7 @@ public class DateUtil {
      * 提示：java.time.temporal.ChronoUnit.DAYS.between(start, end)
      */
     public static long daysBetween(LocalDate start, LocalDate end) {
-        throw new UnsupportedOperationException("TODO 5");
+        return ChronoUnit.DAYS.between(start, end);
     }
 
     /**
@@ -96,7 +98,9 @@ public class DateUtil {
      * 提示：三道手续 —— dateTime.atZone(from).withZoneSameInstant(to).toLocalDateTime()
      */
     public static LocalDateTime convertZone(LocalDateTime dateTime, ZoneId from, ZoneId to) {
-        throw new UnsupportedOperationException("TODO 6");
+        ZonedDateTime source = dateTime.atZone(from);
+        ZonedDateTime target = source.withZoneSameInstant(to);
+        return target.toLocalDateTime();
     }
 
     /**
@@ -104,7 +108,7 @@ public class DateUtil {
      * 提示：内部调用 daysBetween(LocalDate.now(), target)
      */
     public static long daysUntil(LocalDate target) {
-        throw new UnsupportedOperationException("TODO 7");
+        return ChronoUnit.DAYS.between(target, LocalDate.now());
     }
 
     // ==================================================================
