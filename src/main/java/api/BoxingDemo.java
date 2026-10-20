@@ -27,7 +27,7 @@ public class BoxingDemo {
      * </pre>
      */
     public static boolean isCached(int n) {
-        throw new UnsupportedOperationException("TODO 1");
+        return (n>=-128&&n<=127);
     }
 
     /**
