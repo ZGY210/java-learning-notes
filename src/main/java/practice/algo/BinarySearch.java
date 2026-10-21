@@ -39,7 +39,18 @@ public class BinarySearch {
      *   return -1;
      */
     public static int binarySearch(int[] arr, int target) {
-        throw new UnsupportedOperationException("TODO 1");
+        int left = 0, right = arr.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2; // 防溢出的中点计算
+            if (arr[mid] == target) {
+                return mid;
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -56,7 +67,18 @@ public class BinarySearch {
      *   循环结束后 left 就是第一个 ≥ target 的位置。
      */
     public static int lowerBound(int[] arr, int target) {
-        throw new UnsupportedOperationException("TODO 2");
+        int left = 0, right = arr.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (arr[mid] >= target) {
+                // 命中时不直接返回，收缩右边界把答案往左压
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        // 循环结束后 left 就是第一个 ≥ target 的位置
+        return left;
     }
 
     // ==================================================================
