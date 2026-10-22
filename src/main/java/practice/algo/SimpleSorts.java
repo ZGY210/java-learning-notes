@@ -23,7 +23,15 @@ public class SimpleSorts {
      *       如果 a[j] > a[j+1] 就交换
      */
     public static void bubbleSort(int[] a) {
-        throw new UnsupportedOperationException("TODO 1");
+        for (int i = 0; i < a.length - 1; i++) {
+            for (int j = 0; j < a.length-1-i; j++) {
+                if (a[j] > a[j+1]) {
+                    int temp = a[j];
+                    a[j] = a[j+1];
+                    a[j+1] = temp;
+                }
+            }
+        }
     }
 
     /**
@@ -36,7 +44,17 @@ public class SimpleSorts {
      *     如果 minIdx != i，交换
      */
     public static void selectionSort(int[] a) {
-        throw new UnsupportedOperationException("TODO 2");
+        for (int i = 0; i < a.length - 1; i++) {
+            int min = i;
+            for (int j = i + 1; j < a.length; j++) {
+                if (a[j] < a[min]) {
+                    min = j;
+                }
+            }
+            int temp = a[min];
+            a[min] = a[i];
+            a[i] = temp;
+        }
     }
 
     // ==================================================================
