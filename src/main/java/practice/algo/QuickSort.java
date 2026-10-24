@@ -23,15 +23,21 @@ public class QuickSort {
      */
     public static void quickSort(int[] a, int low, int high) {
         if (low >= high) return;
-
-        // TODO 1：调用 partition 得到划分点位置
-        // int p = partition(a, low, high);
-
-        // TODO 2：递归左右两段
-        // quickSort(a, low, p - 1);
+        int i=low+1,j=high;
+        while (i<j) {
+            while (i<j && a[j]>=a[low]) j--;
+            while (i<j && a[i]<=a[low]) i++;
+            int target = a[i];
+            a[i] = a[j];
+            a[j] = target;
+        }
+        int target = a[i];
+        a[i] = a[low];
+        a[low] = target;
         // quickSort(a, p + 1, high);
 
-        throw new UnsupportedOperationException("TODO 1 和 2");
+        quickSort(a, low, i-1);
+        quickSort(a, j + 1, high);
     }
 
     /**

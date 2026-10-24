@@ -28,8 +28,28 @@ public class InsertionSort {
      *     a[j+1] = temp;                   （插到正确位置）
      */
     public static void insertionSort(int[] a) {
-        throw new UnsupportedOperationException("TODO 1");
+        if (a == null || a.length < 2) return;
+
+        // 1. 跳过已有序的前缀
+        int i = 0;
+        while (i < a.length - 1 && a[i] <= a[i + 1]) {
+            i++;
+        }
+        i++;
+
+        // 2. 从 i 开始逐个插入
+        while (i < a.length) {
+            int temp = a[i];
+            int j = i - 1;
+            while (j >= 0 && a[j] > temp) {
+                a[j + 1] = a[j];
+                j--;
+            }
+            a[j + 1] = temp;
+            i++;
+        }
     }
+
 
     // ==================================================================
     // 下面是教练写好的 4 条自查（不动）。判据是：排序正确 + 能讲清过程。
