@@ -23,21 +23,9 @@ public class QuickSort {
      */
     public static void quickSort(int[] a, int low, int high) {
         if (low >= high) return;
-        int i=low+1,j=high;
-        while (i<j) {
-            while (i<j && a[j]>=a[low]) j--;
-            while (i<j && a[i]<=a[low]) i++;
-            int target = a[i];
-            a[i] = a[j];
-            a[j] = target;
-        }
-        int target = a[i];
-        a[i] = a[low];
-        a[low] = target;
-        // quickSort(a, p + 1, high);
-
-        quickSort(a, low, i-1);
-        quickSort(a, j + 1, high);
+        int p = partition(a, low, high);
+        quickSort(a, low, p - 1);
+        quickSort(a, p + 1, high);
     }
 
     /**
@@ -58,7 +46,16 @@ public class QuickSort {
      * </pre>
      */
     public static int partition(int[] a, int low, int high) {
-        throw new UnsupportedOperationException("TODO partition");
+        int pivot = a[high];          // 选最后一个元素为 pivot
+        int i = low - 1;              // 比 pivot 小的最右位置
+        for (int j = low; j < high; j++) {
+            if (a[j] < pivot) {
+                i++;
+                int tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+            }
+        }
+        int tmp = a[i + 1]; a[i + 1] = a[high]; a[high] = tmp;
+        return i + 1;
     }
 
     private static void swap(int[] a, int i, int j) {
