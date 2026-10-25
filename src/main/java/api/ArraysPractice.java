@@ -22,7 +22,13 @@ public class ArraysPractice {
      * 提示：Arrays.sort(arr, Comparator.comparingInt(String::length))
      */
     public static void sortByLength(String[] arr) {
-        throw new UnsupportedOperationException("TODO 1");
+        Arrays.sort(arr, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.length() - o2.length();
+            }
+        });
+
     }
 
     /**
@@ -30,7 +36,12 @@ public class ArraysPractice {
      * 提示：Comparator.comparingInt(...).thenComparing(...)
      */
     public static void sortByAgeThenName(Person[] arr) {
-        throw new UnsupportedOperationException("TODO 2");
+        Arrays.sort(arr, new Comparator<Person>() {
+            @Override
+            public int compare(Person o1, Person o2) {
+                return o1.age - o2.age;
+            }
+        });
     }
 
     /** 内部类，别改 */

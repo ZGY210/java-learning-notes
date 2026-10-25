@@ -1,5 +1,8 @@
 package api;
 
+
+import java.util.Arrays;
+
 /**
  * LambdaPractice —— Lambda 表达式练习（学员自写版）
  *
@@ -23,7 +26,7 @@ public class LambdaPractice {
      *   Runnable r = () -> System.out.println("hello");
      */
     public static Runnable makeRunnable() {
-        throw new UnsupportedOperationException("TODO 1");
+        return () -> System.out.println("hello");
     }
 
     /**
@@ -32,15 +35,27 @@ public class LambdaPractice {
      */
     public static int calculate(String op, int a, int b) {
         // op 是 "+" / "-"，返回对应结果
-        throw new UnsupportedOperationException("TODO 2");
-    }
+        Calculator add = (x, y) -> x + y;
+        Calculator sub = (x, y) -> x - y;
 
-    /**
+        if ("+".equals(op)) {
+            return add.calc(a, b);
+        } else if ("-".equals(op)) {
+            return sub.calc(a, b);
+        }
+        throw new IllegalArgumentException("不支持的运算符: " + op);
+    }
+        /**
      * 用 lambda + Arrays.sort 对 int[] 按绝对值从小到大排序。
      * 提示：Arrays.sort(arr, (x, y) -> Math.abs(x) - Math.abs(y));
      */
     public static void sortByAbs(int[] arr) {
-        throw new UnsupportedOperationException("TODO 3");
+        Integer[] boxed = Arrays.stream(arr).boxed().toArray(Integer[]::new);
+        Arrays.sort(boxed, (x, y) -> Math.abs(x) - Math.abs(y));
+        // 写回原数组
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = boxed[i];
+        }
     }
 
     @FunctionalInterface
