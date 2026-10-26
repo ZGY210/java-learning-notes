@@ -36,12 +36,8 @@ public class ArraysPractice {
      * 提示：Comparator.comparingInt(...).thenComparing(...)
      */
     public static void sortByAgeThenName(Person[] arr) {
-        Arrays.sort(arr, new Comparator<Person>() {
-            @Override
-            public int compare(Person o1, Person o2) {
-                return o1.age - o2.age;
-            }
-        });
+        Arrays.sort(arr, Comparator.comparingInt((Person p) -> p.age)
+                                   .thenComparing(p -> p.name));
     }
 
     /** 内部类，别改 */
