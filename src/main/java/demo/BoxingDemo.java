@@ -1,4 +1,4 @@
-package api;
+package demo;
 
 /**
  * BoxingDemo —— 包装类自动装箱 / 拆箱实验（学员自写版）

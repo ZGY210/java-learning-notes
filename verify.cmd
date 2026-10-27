@@ -20,6 +20,7 @@ rem ============================================================
 cd /d "%~dp0"
 
 set "SRC=src\main\java"
+set "TEST=src\test\java"
 set "OUT=target\classes"
 
 echo ==========================================
@@ -32,6 +33,7 @@ mkdir "%OUT%" 2>nul
 
 echo [1/4] compiling ...
 dir /s /b "%SRC%\*.java" > "%TEMP%\p1_sources.txt"
+if exist "%TEST%" dir /s /b "%TEST%\*.java" >> "%TEMP%\p1_sources.txt"
 javac -encoding UTF-8 --release 17 -d "%OUT%" @"%TEMP%\p1_sources.txt"
 if errorlevel 1 (
     echo.

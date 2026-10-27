@@ -68,7 +68,7 @@ java-learning-notes/                       ← 本仓库根目录
 │
 ├── journal/                   # 📅 日志：每天 3 行 + 每周复盘
 │   ├── README.md                  # 为什么这个目录对求职最重要
-│   └── 2026-10-13-D1.md           # 每日一篇
+│   └── 2026-10-26.md              # 每日一篇（另有 2026-10-24-诊断题.md 等）
 │
 ├── leetcode/                  # 🧩 题解：命名 0001-两数之和.md
 │   ├── README.md                  # 60 题进度表 + 三条铁律
@@ -78,15 +78,28 @@ java-learning-notes/                       ← 本仓库根目录
 ├── mvn-local.cmd              # 复用 IDEA 自带 Maven，无需单独安装
 ├── verify.cmd                 # 一键编译 + 跑全部自测（每天 commit 前跑）
 ├── push-to-github.ps1         # 首次推送 + 失败分类排查（必须存为 UTF-8 带 BOM，见文末）
-└── src/main/java/
-    ├── api/                   # 常用 API 练习
-    │   ├── RegexUtil.java         # 正则：校验 / 提取 / 分组 / 脱敏
-    │   ├── MoneyUtil.java         # BigDecimal 金额计算与分摊
-    │   └── DateUtil.java          # java.time、时区换算、线程安全对比实验
-    └── practice/
-        └── mycollection/      # 手写集合框架
-            ├── MyArrayList.java        # 手写 ArrayList（1.5 倍扩容 + fail-fast）
-            └── MyArrayListTest.java    # 30 项自测，全绿才算过关
+├── src/main/java/
+│   ├── api/                   # ✅ 你自己写的工具类（面试要能背出实现思路）
+│   │   ├── RegexUtil.java            # 正则：校验 / 提取 / 分组 / 脱敏
+│   │   ├── MoneyUtil.java            # BigDecimal 金额计算与分摊
+│   │   └── DateUtil.java             # java.time、时区换算、线程安全对比
+│   ├── demo/                  # 学知识点时的一次性实验（不是面试作品）
+│   │   ├── BigIntegerDemo.java
+│   │   ├── BoxingDemo.java
+│   │   ├── DatePractice.java
+│   │   ├── ArraysPractice.java
+│   │   └── LambdaPractice.java
+│   ├── practice/
+│   │   ├── algo/                     # 手写算法：二分 / 冒泡选择 / 插入 / 快排
+│   │   └── mycollection/
+│   │       └── MyArrayList.java      # 手写 ArrayList（1.5 倍扩容 + modCount）
+│   └── reference/             # ⚠️ 教练参考答案，只准看签名和注释
+│       ├── RegexUtil.java
+│       ├── MoneyUtil.java
+│       └── DateUtil.java
+└── src/test/java/
+    └── practice/mycollection/
+        └── MyArrayListTest.java     # 30 项自测，全绿才算过关
 ```
 
 > **「代码 + 笔记 + 日志 + 题解」四合一**是刻意的：面试官点开这个仓库，能看到的不只是代码，而是一条**持续 12 个月、每天都有痕迹的证据链**。对双非学生来说，这条链比学历更能说明问题。
@@ -98,19 +111,19 @@ java-learning-notes/                       ← 本仓库根目录
 ## 进度看板
 
 > ⚠️ **状态口径**：`⬜ 未学` → `🔄 学习中` → `✅ 已掌握`。
-> **「仓库里有代码」≠「已掌握」。** `api/` 下那三个类目前是**参考答案**（先于视频写好），你必须关掉它们从头重写一遍才算 ✅。
+> **「仓库里有代码」≠「已掌握」。** 判据只有一条：`api/` 里的实现是不是你**关掉 `reference/` 自己写出来的**。
 
-### P1-a · 常用 API + 常见算法收尾（2026-10-14 → 10-26）
+### P1-a · 常用 API + 常见算法收尾（2026-10-14 → 10-25）✅
 
 | 视频集 | 内容 | 状态 | 验收物 |
 | --- | --- | :---: | --- |
-| 161–162 | BigInteger / BigDecimal | 🔄 | `api/BigIntegerDemo.java`（100! 与 long 溢出对比） |
-| 163–168 | 正则表达式 | ⬜ | **重写** `api/RegexUtil.java` |
-| 169–173 | 日期时间（JDK7 / JDK8） | ⬜ | **重写** `api/DateUtil.java` + `SimpleDateFormat` 线程不安全复现 |
-| 174 | 包装类 | ⬜ | `api/BoxingDemo.java` 六组实验 |
-| 176–183 | 常见算法（查找 / 排序 / Arrays / lambda） | ⬜ | `practice/algo/` 四个手写文件 |
-| — | 12 道查漏诊断题（10/24 闭卷） | ⬜ | 得分 ≥ 9 |
-| — | 集合预热件（**抢跑**） | 🎁 | `MyArrayList`（含 `modCount`，30 项自测全绿）**待读懂** |
+| 161–162 | BigInteger / BigDecimal | ✅ | `demo/BigIntegerDemo.java`、`api/MoneyUtil.java`（7 条自查全绿） |
+| 163–168 | 正则表达式 | ✅ | `api/RegexUtil.java`（12 条自查全绿） |
+| 169–173 | 日期时间（JDK7 / JDK8） | ✅ | `demo/DatePractice.java`、`api/DateUtil.java`（11 条自查全绿） |
+| 174 | 包装类 | ✅ | `demo/BoxingDemo.java` 六组实验（8 条自查全绿） |
+| 176–183 | 常见算法（查找 / 排序 / Arrays / lambda） | ✅ | `practice/algo/` 四个手写文件、`demo/ArraysPractice.java`、`demo/LambdaPractice.java` |
+| — | 12 道查漏诊断题（10/24 闭卷） | ✅ | **12 / 12** |
+| — | 集合预热件（**抢跑**） | 🎁 | `MyArrayList`（含 `modCount`，全绿）**待读懂** |
 
 ### P1-b · 集合框架（2026-10-26 → 11-30）
 
