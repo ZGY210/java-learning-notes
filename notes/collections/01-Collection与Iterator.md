@@ -56,6 +56,14 @@ for (Iterator<X> it = list.iterator(); it.hasNext(); ) {
 
 ```
 
+### 4. 为什么迭代器自己的 `remove()` 之后，要把 `expectedModCount` 重新同步成 `modCount`？（2026-10-30）
+
+因为 `Itr.remove()` 内部是**委托给集合的 `remove(lastRet)`** 干活的，而集合的 remove 会让 `modCount + 1`——这个 +1 是「合法修改」，不是并发修改。如果迭代器删完之后不把 `expectedModCount` 更新成新的 `modCount`，两者就会差 1，**下一次 `next()` 里的 `checkForComodification()` 会把迭代器自己发起的这次删除当成「遍历期间集合被外部改了」，抛 `ConcurrentModificationException` 误杀自己**。
+
+换句话说：fail-fast 检测的是「我不知道的修改」；迭代器自己的 remove 是「我知道的修改」，所以做完必须把快照对齐，表示「这次变动我知情」。这也解释了为什么 `for-each` 里 `list.remove(x)` 必炸、而 `it.remove()` 没事——差别不在删不删，而在删完之后有没有人负责同步 `expectedModCount`。
+
+顺带记住 `Itr.remove()` 的另外两步善后：`cursor = lastRet`（删除点后面的元素左移了一格，cursor 退回一格才不会跳过下一个元素）、`lastRet = -1`（防止没 next 就 remove、或连续 remove 两次，这两种都抛 `IllegalStateException`）。
+
 ---
 
 ## 三、什么场景用它、有什么坑

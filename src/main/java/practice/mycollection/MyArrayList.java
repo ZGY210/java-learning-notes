@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  * <ul>
  *   <li>JDK 用 {@code System.arraycopy} 之外的 add(index,e) 元素右移逻辑，本类只实现尾部 add；</li>
  *   <li>JDK 的 remove 还会把空间缩容（trimToSize 才做），本类不缩；</li>
- *   <li>JDK 的迭代器有 remove() / forEachRemaining()，本类只做 hasNext/next。</li>
+ *   <li>JDK 的迭代器还有 forEachRemaining()，本类做到 hasNext/next/remove。</li>
  * </ul>
  *
  * @param <E> 元素类型
@@ -231,14 +231,21 @@ public class MyArrayList<E> implements Iterable<E> {
     }
 
     /**
-     * 迭代器实现，带 fail-fast。
-     * <p>三个要点：cursor 指向「下一个要返回的元素」；expectedModCount 在创建时定格；
-     * 每次 next() 先对比 modCount 与 expectedModCount。</p>
+     * 迭代器实现，带 fail-fast 和 remove()。
+     * <p>四个要点：cursor 指向「下一个要返回的元素」；lastRet 记住「上一次返回的下标」；
+     * expectedModCount 在创建时定格；每次 next()/remove() 先对比 modCount 与 expectedModCount。</p>
      */
     private class Itr implements Iterator<E> {
 
         /** 下一个要返回的元素下标，从 0 开始。 */
         private int cursor;
+
+        /**
+         * 上一次 next() 返回的元素下标；-1 表示还没返回过任何元素。
+         * <p>remove() 靠它知道「要删的是哪个」，也靠它拒绝「还没 next 就 remove」和
+         * 「连续 remove 两次」这两种非法调用。JDK 用的也是这个名字、这个初值。</p>
+         */
+        private int lastRet = -1;
 
         /** 迭代器创建时的 modCount 快照，用来检测「遍历期间结构被改」。 */
         private int expectedModCount = modCount;
@@ -264,7 +271,41 @@ public class MyArrayList<E> implements Iterable<E> {
             if (cursor >= size) {
                 throw new NoSuchElementException();
             }
-            return (E) elementData[cursor++];
+            E value = (E) elementData[cursor];
+            lastRet = cursor;   // 记住这次返回的位置，供 remove() 使用
+            cursor++;
+            return value;
+        }
+
+        /**
+         * 删除上一次 next() 返回的那个元素。三步（与 JDK Itr.remove 结构一致）：
+         * <ol>
+         *   <li>lastRet < 0 → IllegalStateException：还没 next 过、或已经 remove 过一次，
+         *       此时「上一个返回的元素」不存在，删无可删；</li>
+         *   <li>先 checkForComodification() 确认没有外部改动，再委托给外部类的
+         *       remove(lastRet)——真正搬移元素、modCount++ 的都是它；</li>
+         *   <li>善后三件事：cursor = lastRet（删除点后面的元素整体左移了一格，
+         *       cursor 原本指向的位置现在被后一个元素占据，退回去一格才不会跳过元素）；
+         *       lastRet = -1（防连续 remove 两次）；
+         *       expectedModCount = modCount（<b>关键</b>：外部类的 remove 让 modCount +1 了，
+         *       这次修改是迭代器自己发起的、不是并发修改，必须重新同步快照，
+         *       否则下一次 next() 的 checkForComodification 会把自己误杀）。</li>
+         * </ol>
+         */
+        @Override
+        public void remove() {
+            if (lastRet < 0) {
+                throw new IllegalStateException();
+            }
+            checkForComodification();
+            try {
+                MyArrayList.this.remove(lastRet);
+                cursor = lastRet;
+                lastRet = -1;
+                expectedModCount = modCount;   // 同步！否则下次 next() 抛 CME
+            } catch (IndexOutOfBoundsException ex) {
+                throw new ConcurrentModificationException();
+            }
         }
     }
 
@@ -302,5 +343,20 @@ public class MyArrayList<E> implements Iterable<E> {
                 System.out.println("size=" + grow.size() + " 时扩容到 " + last);
             }
         }
+
+        System.out.println("\n--- 验收：迭代器 remove() 删掉 b，不抛异常 ---");
+        MyArrayList<String> itrList = new MyArrayList<>();
+        itrList.add("a");
+        itrList.add("b");
+        itrList.add("c");
+        Iterator<String> it = itrList.iterator();
+        while (it.hasNext()) {
+            String s = it.next();
+            if ("b".equals(s)) {
+                it.remove();   // 只有迭代器自己的 remove 才不会触发 fail-fast
+            }
+        }
+        System.out.println("删完后 size = " + itrList.size());          // 应为 2
+        System.out.println("剩下的元素 = " + itrList.get(0) + ", " + itrList.get(1)); // 应为 a, c
     }
 }

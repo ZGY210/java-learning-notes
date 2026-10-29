@@ -13,9 +13,10 @@ import java.util.NoSuchElementException;
  * java -cp out practice.mycollection.MyArrayListTest
  * </pre>
  *
- * <p><b>预期结果：13 项全部 PASS。</b>
+ * <p><b>预期结果：全部 PASS（当前共 39 项）。</b>
  * D1 时其中 5 项会失败（remove 搬移相关 3 项、迭代器耗尽 1 项、fail-fast 1 项），
- * 补齐 remove 与 modCount 之后应当全绿。只要有 FAIL，就不算过 D2。</p>
+ * 补齐 remove 与 modCount 之后应当全绿。D3 新增迭代器 remove() 相关 8 项。
+ * 只要有 FAIL，就不算过。</p>
  *
  * @author 学员自测用
  */
@@ -45,6 +46,9 @@ public class MyArrayListTest {
         testFailFastOnAddDuringIteration();
         testFailFastOnRemoveDuringIteration();
         testSetDoesNotTriggerFailFast();
+        testIteratorRemove();
+        testIteratorRemoveIllegalStates();
+        testIteratorRemoveNoSkip();
 
         System.out.println("\n===== 结果：" + passed + " PASS / " + failed + " FAIL =====");
         if (failed == 0) {
@@ -210,6 +214,64 @@ public class MyArrayListTest {
         check("遍历中 set 不触发 ConcurrentModificationException（符合 JDK 行为）", ok);
     }
 
+    private static void testIteratorRemove() {
+        MyArrayList<String> list = new MyArrayList<>();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+        // 验收场景：用迭代器把 b 删掉，不抛异常，size==2，剩下 a、c
+        boolean noThrow = true;
+        try {
+            Iterator<String> it = list.iterator();
+            while (it.hasNext()) {
+                if ("b".equals(it.next())) {
+                    it.remove();
+                }
+            }
+        } catch (Exception e) {
+            noThrow = false;
+        }
+        check("迭代器 remove() 删 b 不抛异常", noThrow);
+        check("迭代器 remove() 后 size()==2（实际 " + list.size() + "）", list.size() == 2);
+        check("迭代器 remove() 后剩下 a,c", "a".equals(list.get(0)) && "c".equals(list.get(1)));
+    }
+
+    private static void testIteratorRemoveIllegalStates() {
+        MyArrayList<Integer> list = new MyArrayList<>();
+        list.add(1);
+        list.add(2);
+        Iterator<Integer> it = list.iterator();
+        // 还没 next 就 remove → IllegalStateException
+        check("未 next 就 remove() 抛 IllegalStateException", throwsISE(it::remove));
+        it.next();
+        it.remove();
+        // 连续 remove 两次 → IllegalStateException（lastRet 已被重置为 -1）
+        check("连续 remove() 两次抛 IllegalStateException", throwsISE(it::remove));
+        // remove 之后迭代还能正常继续（expectedModCount 已同步，不误杀自己）
+        check("迭代器 remove() 后还能继续 next()（不抛 CME）", it.next() == 2);
+        check("删掉 1 之后 size()==1", list.size() == 1);
+    }
+
+    private static void testIteratorRemoveNoSkip() {
+        // cursor = lastRet 的意义：删除点后面的元素左移一格，cursor 退回去才不会跳过元素
+        MyArrayList<Integer> list = new MyArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            list.add(i);   // [0,1,2,3,4]
+        }
+        Iterator<Integer> it = list.iterator();
+        StringBuilder seen = new StringBuilder();
+        while (it.hasNext()) {
+            Integer v = it.next();
+            seen.append(v);
+            if (v % 2 == 0) {
+                it.remove();   // 删 0、2、4，奇数一个都不能跳过
+            }
+        }
+        check("隔一个删一个：每个元素都被访问到（实际 " + seen + "）", "01234".contentEquals(seen));
+        check("隔一个删一个：剩下 1,3（size==" + list.size() + "）",
+                list.size() == 2 && list.get(0) == 1 && list.get(1) == 3);
+    }
+
     // ---------------- 断言工具 ----------------
 
     private static boolean throwsIOOBE(ThrowingRunnable runnable) {
@@ -239,6 +301,17 @@ public class MyArrayListTest {
             runnable.run();
             return false;
         } catch (NoSuchElementException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean throwsISE(ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+            return false;
+        } catch (IllegalStateException e) {
             return true;
         } catch (Exception e) {
             return false;
