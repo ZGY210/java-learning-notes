@@ -29,7 +29,11 @@ public class ListTraversalDemo {
      * 提示：for (int i = 0; i < list.size(); i++) { sb.append(list.get(i)); }
      */
     public static String byIndex(List<String> list) {
-        throw new UnsupportedOperationException("TODO 1");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            sb.append(list.get(i));
+        }
+        return sb.toString();
     }
 
     /**
@@ -38,7 +42,11 @@ public class ListTraversalDemo {
      * 提示：for (String s : list) { sb.append(s); }
      */
     public static String byForEach(List<String> list) {
-        throw new UnsupportedOperationException("TODO 2");
+        StringBuilder sb = new StringBuilder();
+        for (String i:list){
+            sb.append(i);
+       }
+        return sb.toString();
     }
 
     /**
@@ -47,7 +55,12 @@ public class ListTraversalDemo {
      * 提示：for (Iterator<String> it = list.iterator(); it.hasNext(); ) { sb.append(it.next()); }
      */
     public static String byIterator(List<String> list) {
-        throw new UnsupportedOperationException("TODO 3");
+        Iterator<String> it = list.iterator();
+        StringBuilder sb = new StringBuilder();
+        while (it.hasNext()) {
+            sb.append(it.next());
+        }
+        return sb.toString();
     }
 
     /**
@@ -56,7 +69,9 @@ public class ListTraversalDemo {
      * 提示：for (ListIterator<String> it = list.listIterator(); it.hasNext(); ) { sb.append(it.next()); }
      */
     public static String byListIterator(List<String> list) {
-        throw new UnsupportedOperationException("TODO 4");
+        StringBuilder sb = new StringBuilder();
+        for (ListIterator<String> it = list.listIterator(); it.hasNext(); ) { sb.append(it.next()); }
+        return sb.toString();
     }
 
     /**
@@ -65,7 +80,9 @@ public class ListTraversalDemo {
      * 提示：list.forEach(s -> sb.append(s));
      */
     public static String byLambda(List<String> list) {
-        throw new UnsupportedOperationException("TODO 5");
+        StringBuilder sb = new StringBuilder();
+        list.forEach(s -> sb.append(s));
+        return sb.toString();
     }
 
     /**
@@ -79,7 +96,12 @@ public class ListTraversalDemo {
      *       while (it.hasNext()) { if (target.equals(it.next())) it.remove(); }
      */
     public static void removeByIterator(MyArrayList<String> list, String target) {
-        throw new UnsupportedOperationException("TODO 6");
+        Iterator<String> it = list.iterator();
+        while (it.hasNext()) {
+            if (it.next().equals(target)) {
+                it.remove();
+            }
+        }
     }
 
     // ==================================================================
