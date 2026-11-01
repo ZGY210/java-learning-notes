@@ -41,7 +41,19 @@ public class MyLinkedList<E> {
      * 提示：如果 head 是 null 直接挂上；否则从头走到最后一个节点，把 next 接上。
      */
     public void add(E e) {
-        throw new UnsupportedOperationException("TODO 1");
+        Node<E> newNode = new Node<>(e);   // 先把要插入的节点造出来
+        if (head == null) {                // 情况1：链表是空的
+            head = newNode;                // 新节点直接当头
+        } else {                           // 情况2：链表非空
+            Node<E> cur = head;            // 从头开始
+            while (cur.next != null) {     // 一路走到最后一个节点
+                cur = cur.next;
+
+            }
+            cur.next = newNode;            // 最后一个节点的 next 接上新节点
+        }
+        size++;
+
     }
 
     /**
@@ -53,7 +65,24 @@ public class MyLinkedList<E> {
      * 否则先走到 index-1 的节点，把新节点接在它和它原来的 next 之间。
      */
     public void add(int index, E e) {
-        throw new UnsupportedOperationException("TODO 2");
+       Node<E> newNode = new Node<>(e);
+       if (index < 0 || index > size) {
+           throw new IndexOutOfBoundsException(
+                   "Index: " + index + ", Size: " + size
+           );
+       }
+       if (index == 0) {
+           newNode.next = head;   // 新节点指向原来的头
+           head = newNode;   // head 更新为新节点
+       }else  {
+           Node<E> cur = head;
+           for (int i = 1; i < index; i++) {
+               cur = cur.next;
+           }
+           newNode.next = cur.next;
+           cur.next = newNode;
+       }
+       size++;
     }
 
     /**
@@ -64,7 +93,15 @@ public class MyLinkedList<E> {
      * 提示：链表没有下标，只能从头走 index 步；越界抛 IndexOutOfBoundsException。
      */
     public E get(int index) {
-        throw new UnsupportedOperationException("TODO 3");
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + size);
+        }
+         Node<E> cur  = head;
+        for (int i = 0; i < index; i++) {
+            cur = cur.next;
+        }
+        return cur.val;
     }
 
     /**
@@ -76,17 +113,33 @@ public class MyLinkedList<E> {
      * 越界抛 IndexOutOfBoundsException。
      */
     public E remove(int index) {
-        throw new UnsupportedOperationException("TODO 4");
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + size
+            );
+        }
+        E value = get(index);
+        Node<E> cur  = head;
+        if (index == 0) {
+            head = cur.next;
+        }else {
+            for (int i = 1; i < index; i++) {
+                cur = cur.next;
+            }
+            cur.next = cur.next.next;
+        }
+        size--;
+        return value;
     }
 
     /** @return 元素个数 */
     public int size() {
-        throw new UnsupportedOperationException("TODO 5");
+        return size;
     }
 
     /** @return 是否为空 */
     public boolean isEmpty() {
-        throw new UnsupportedOperationException("TODO 6");
+        return head == null;
     }
 
     /**
@@ -106,7 +159,18 @@ public class MyLinkedList<E> {
      *   head = prev;
      */
     public void reverse() {
-        throw new UnsupportedOperationException("TODO 7");
+        if (head == null) {
+            return;
+        }
+        Node<E> prev = null;
+        Node<E> cur = head;
+        while (cur != null) {
+            Node<E> next = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = next;
+        }
+        head = prev;
     }
 
     /** 便于肉眼验证：把链表打印成 [a, b, c] 的形式。 */
