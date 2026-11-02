@@ -12,7 +12,14 @@ import java.util.NoSuchElementException;
  *
  * <p>D3 改造（2026-10-29）：懒初始化对齐 JDK —— 不再用 null，也不用「构造即开数组」，
  * 而是两个共享空数组常量 {@code EMPTY_ELEMENTDATA} / {@code DEFAULTCAPACITY_EMPTY_ELEMENTDATA}，
- * 构造器只赋引用，第一次 add 进 grow 前按引用比较决定开 10 还是按 minCapacity 开。</p>
+ * 构造器只赋引用，第一次 add 进 grow 前按引用比较决定开 10 还是按 minCapacity 开。
+ * 迭代器补上 remove()（lastRet 三步善后）。</p>
+ *
+ * <p>D4 源码精读（2026-11-02）三个方向：
+ * ① modCount++ 移到公开方法开头（add/remove 先记账再干活，grow 内部不动 modCount）；
+ * ② 补 MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8 软上限 + hugeCapacity 兜底 + 溢出安全的
+ *   newCapacity（旧写法在 oldCapacity 超 14.3 亿时 1.5 倍会溢出成负数，静默退化为每次 +1 格）；
+ * ③ remove 的 elementData[--size] = null 注释补全「游离对象 / loitering object」的 GC 原理。</p>
  *
  * <p>本次补上（D2 核心）：<b>modCount 与 expectedModCount</b>。
  * 这是 JDK 集合最容易被面试问到、也最容易写漏的一处设计：
@@ -98,14 +105,37 @@ public class MyArrayList<E> implements Iterable<E> {
 
     /**
      * 在末尾追加一个元素。
+     * <p><b>对照 JDK 修正了 modCount++ 的位置（方向 1）</b>：
+     * JDK 21 的 add 是 {@code modCount++; add(e, elementData, size);}——先 +1，
+     * 再进「判断要不要 grow → elementData[s] = e → size = s + 1」的私有小方法；
+     * 也就是说 modCount++ 放在<b>公开方法这一层、且在一切实际操作之前</b>，
+     * 扩容（grow）内部反而不动 modCount。我之前放在赋值之后，语义上不算错
+     * （没有代码会在两者之间观测 modCount），但顺序对齐 JDK 有个实际好处：
+     * 万一 add 中途抛异常（比如 grow 抛 OutOfMemoryError），modCount 已经 +1，
+     * 在途迭代器会 fail-fast，不会带着「结构可能已坏」的状态继续被信任。</p>
      *
      * @return 按 Collection 接口约定，永远返回 true
      */
     public boolean add(E e) {
-        ensureCapacity(size + 1);
-        elementData[size++] = e;
-        modCount++;   // 结构变了
+        modCount++;   // 结构将变，JDK 的顺序：先记账再干活
+        add(e, elementData, size);
         return true;
+    }
+
+    /**
+     * add 的私有实现，与 JDK 同构。
+     * <p>JDK 把它单独拆出来的原因写在源码注释里：让 add(E) 的字节码小于 35 字节
+     * （-XX:MaxInlineSize 默认值），这样在 C1 编译的循环里 add(E) 能被内联。
+     * 我暂时不做这层性能考量，但保留同样的结构——扩容判断只看
+     * {@code s == elementData.length}（满了才 grow），比每次进 ensureCapacity
+     * 比较 minCapacity 少一层调用。</p>
+     */
+    private void add(E e, Object[] elementData, int s) {
+        if (s == elementData.length) {
+            elementData = grow(s + 1);
+        }
+        elementData[s] = e;
+        size = s + 1;
     }
 
     /**
@@ -132,19 +162,26 @@ public class MyArrayList<E> implements Iterable<E> {
 
     /**
      * 删除下标 index 处的元素并返回它。
-     * <p>关键只有一句：把后面的元素整体往前挪一格，然后把最后一格置 null 帮助 GC。</p>
+     * <p>关键只有一句：把后面的元素整体往前挪一格，然后把最后一格置 null。</p>
+     * <p><b>为什么必须置空（方向 3）</b>：remove 之后 size 减 1，最后一格在「逻辑上」
+     * 已经没有元素了，但数组槽位里还挂着被删对象的引用——这叫 <b>loitering object（游离对象）</b>。
+     * 只要数组还引用着它，GC 就认为它可达、永远不回收；如果那是个 100MB 的大对象，
+     * 删掉之后内存却纹丝不动，就是典型的内存泄漏。置 null 是把引用掐断，让 GC 能收走它。
+     * 注意只置「逻辑边界外的格子」：下标 &lt; size 的位置马上会被覆盖或本来就有效，不用置。</p>
+     * <p>modCount++ 的位置对齐 JDK：JDK 在 fastRemove 的<b>开头</b>就 +1，
+     * 先记账再搬元素，理由同 add——中途出异常也不留下「结构可疑但计数没变」的状态。</p>
      */
     @SuppressWarnings("unchecked")
     public E remove(int index) {
         checkIndex(index);
+        modCount++;   // 结构将变，先记账（JDK fastRemove 的顺序）
         E old = (E) elementData[index];
         int moved = size - index - 1;
         if (moved > 0) {
             // 参数含义：从 index+1 开始搬，搬到 index 处，一共搬 moved 个
             System.arraycopy(elementData, index + 1, elementData, index, moved);
         }
-        elementData[--size] = null;
-        modCount++;   // 结构变了
+        elementData[--size] = null;   // 掐断游离对象的引用，帮助 GC
         return old;
     }
 
@@ -191,34 +228,75 @@ public class MyArrayList<E> implements Iterable<E> {
     }
 
     /**
-     * 保证数组至少能装下 minCapacity 个元素（add 的扩容入口）。
-     * <p>JDK 的结构是两层：ensureCapacity/ensureCapacityInternal 判断「要不要扩」，
-     * grow 负责「扩多大」。这里合并成一个方法，但保留了 JDK 最关键的判断顺序——
-     * <b>先看是不是 DEFAULTCAPACITY_EMPTY_ELEMENTDATA，再看容量够不够</b>。</p>
+     * 数组最大软上限（方向 2）：Integer.MAX_VALUE - 8。
+     * <p><b>为什么是 -8</b>：有些 JVM（如 HotSpot）对数组长度有自己的实现上限，
+     * 申请接近 Integer.MAX_VALUE 的数组会抛
+     * {@code OutOfMemoryError: Requested array size exceeds VM limit}——即使堆还够。
+     * 实际限制取决于 JVM 实现（比如对象头大小，HotSpot 的对象头常见就是 8 字节量级），
+     * 所以 JDK 保守地取 MAX_VALUE - 8，确保低于任何可能遇到的实现限制。
+     * 这是「软」上限：真有需求超过它时还是允许超（见 hugeCapacity）。</p>
      */
-    private void ensureCapacity(int minCapacity) {
-        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
-            // 无参构造后第一次 add：把 minCapacity 抬到至少 DEFAULT_CAPACITY，
-            // 直接开 10 格，而不是开 1 格下次又扩 —— 这就是「首次扩容按默认容量」。
-            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
-        }
-        if (minCapacity > elementData.length) {
-            grow(minCapacity);
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    /**
+     * 扩容入口：保证数组至少能装下 minCapacity 个元素。
+     * <p>JDK 21 里「要不要扩」的判断在 add(e, elementData, s)（s == length 才 grow），
+     * 「首次开 10」的判断在 grow 内部（看 elementData 是不是 DEFAULTCAPACITY_EMPTY_ELEMENTDATA）。
+     * 我之前把首次判断放在单独的 ensureCapacity 里用 null 分支做，上一轮已改成空数组常量，
+     * 这一轮把结构也对齐：ensureCapacity 不再需要，逻辑全部收进 grow。</p>
+     */
+    private Object[] grow(int minCapacity) {
+        int oldCapacity = elementData.length;
+        if (oldCapacity > 0 || elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
+            // 正常扩容路径：按 1.5 倍（oldCapacity >> 1）优先，不够 minCapacity 就按需补齐
+            int newCapacity = newCapacity(oldCapacity, minCapacity - oldCapacity, oldCapacity >> 1);
+            return elementData = Arrays.copyOf(elementData, newCapacity);
+        } else {
+            // 无参构造后第一次 add（oldCapacity==0 且是 DEFAULTCAPACITY 空数组）：直接开 10
+            return elementData = new Object[Math.max(DEFAULT_CAPACITY, minCapacity)];
         }
     }
 
     /**
-     * 真正的扩容动作：按 minCapacity 开新数组，把旧元素搬过去。
-     * <p>扩容策略：JDK 原版写法 oldCapacity + (oldCapacity >> 1)，即约 1.5 倍。
-     * 之所以不是 2 倍（HashMap 才是 2 倍），是为了在「空间浪费」与「扩容次数」之间取平衡。</p>
+     * 溢出安全的新容量计算（方向 2 补的核心）。
+     * <p>我之前的写法 {@code oldCapacity + (oldCapacity >> 1)} 有个隐藏 bug：
+     * 当 oldCapacity 超过约 14.3 亿时，1.5 倍的结果<b>溢出成负数</b>，
+     * 负数又必然小于 minCapacity，于是「兜底取 minCapacity」把问题掩盖了——
+     * 扩容退化成每次只加 1 格，性能悄悄变成 O(n²)，还不报错。
+     * JDK 的做法：先算 prefLength（允许溢出），用 {@code 0 < prefLength} 把
+     * 「溢出成负数」和「0」两种情况一起挡掉，超上限的走 hugeCapacity 冷路径。</p>
+     *
+     * @param minGrowth  最少要加多少格（必须为正）
+     * @param prefGrowth 最好加多少格（1.5 倍策略里的 oldCapacity >> 1）
      */
-    private void grow(int minCapacity) {
-        int oldCapacity = elementData.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);   // 1.5 倍
-        if (newCapacity < minCapacity) {
-            newCapacity = minCapacity;   // 一次加很多（如 addAll）时，1.5 倍可能还不够，按需补齐
+    private static int newCapacity(int oldCapacity, int minGrowth, int prefGrowth) {
+        int prefLength = oldCapacity + Math.max(minGrowth, prefGrowth); // 可能溢出
+        if (0 < prefLength && prefLength <= MAX_ARRAY_SIZE) {
+            return prefLength;
+        } else {
+            return hugeCapacity(oldCapacity, minGrowth);   // 冷路径单独放，方便 JIT 内联热路径
         }
-        elementData = Arrays.copyOf(elementData, newCapacity);
+    }
+
+    /**
+     * 逼近数组上限时的兜底（方向 2）。JDK 叫 hugeLength/hugeCapacity，逻辑一致：
+     * <ul>
+     *   <li>minLength 连 int 都溢出（&lt;0）→ 抛 OutOfMemoryError，这是真装不下了；</li>
+     *   <li>minLength 在软上限内 → 返回 MAX_ARRAY_SIZE，一次给到位；</li>
+     *   <li>minLength 超过软上限但在 int 范围内 → 返回 minLength，
+     *       让分配去碰 JVM 的真实上限（软上限只是保守估计，不是硬规则）。</li>
+     * </ul>
+     */
+    private static int hugeCapacity(int oldCapacity, int minGrowth) {
+        int minLength = oldCapacity + minGrowth;
+        if (minLength < 0) { // int 溢出，说明要求的长度超过 Integer.MAX_VALUE
+            throw new OutOfMemoryError(
+                    "Required array length " + oldCapacity + " + " + minGrowth + " is too large");
+        } else if (minLength <= MAX_ARRAY_SIZE) {
+            return MAX_ARRAY_SIZE;
+        } else {
+            return minLength;
+        }
     }
 
     /**
