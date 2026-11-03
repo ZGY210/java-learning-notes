@@ -44,7 +44,16 @@ public class MyDoublyLinkedList<E> {
      * 如果链表本来为空，last 也要指向新节点。
      */
     public void addFirst(E e) {
-        throw new UnsupportedOperationException("TODO 1");
+        Node<E> newNode = new Node<>(e);
+        newNode.next = first;
+        if (first != null) {
+            first.prev = newNode;
+        }
+        first = newNode;
+        if (last == null) {
+            last = newNode;
+        }
+        size++;
     }
 
     /**
@@ -54,7 +63,16 @@ public class MyDoublyLinkedList<E> {
      * </pre>
      */
     public void addLast(E e) {
-        throw new UnsupportedOperationException("TODO 2");
+        Node<E> newNode = new Node<>(e);
+        newNode.prev = last;
+        if (last != null) {
+            last.next = newNode;
+        }
+        last = newNode;
+        if (first == null) {
+            first = newNode;
+        }
+        size++;
     }
 
     /**
@@ -65,7 +83,16 @@ public class MyDoublyLinkedList<E> {
      * 提示：删到只剩一个时，last 也要置 null。
      */
     public E removeFirst() {
-        throw new UnsupportedOperationException("TODO 3");
+        E val = first.val;
+        if (first == last) {      // 只剩一个节点
+            first = null;
+            last = null;
+        } else {
+            first = first.next;
+            first.prev = null;
+        }
+        size--;
+        return val;
     }
 
     /**
@@ -75,7 +102,17 @@ public class MyDoublyLinkedList<E> {
      * </pre>
      */
     public E removeLast() {
-        throw new UnsupportedOperationException("TODO 4");
+        E val = last.val;
+        if (first == last) {      // 只剩一个节点
+            first = null;
+            last = null;
+        } else {
+            last = last.prev;
+            last.next = null;
+        }
+        size--;
+        return val;
+
     }
 
     /**
@@ -87,12 +124,27 @@ public class MyDoublyLinkedList<E> {
      * 越界抛 IndexOutOfBoundsException。
      */
     public E get(int index) {
-        throw new UnsupportedOperationException("TODO 5");
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("index out of bounds");
+        }
+        if (index < size / 2) {
+            Node<E> cur = first;
+            for (int i = 0; i < index; i++) {
+                cur = cur.next;
+            }
+            return cur.val;
+        } else {
+            Node<E> cur = last;
+            for (int i = size - 1; i > index; i--) {
+                cur = cur.prev;
+            }
+            return cur.val;
+        }
     }
 
     /** @return 元素个数 */
     public int size() {
-        throw new UnsupportedOperationException("TODO 6");
+        return size;
     }
 
     /** 便于肉眼验证：把链表打印成 [a, b, c] 的形式。 */
