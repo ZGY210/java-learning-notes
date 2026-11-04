@@ -1,6 +1,7 @@
 package demo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,11 +22,11 @@ public class GenericPractice {
         private T value;
 
         public void put(T v) {
-            throw new UnsupportedOperationException("TODO 1-put");
+            this.value = v;
         }
 
         public T get() {
-            throw new UnsupportedOperationException("TODO 1-get");
+            return this.value;
         }
     }
 
@@ -35,7 +36,7 @@ public class GenericPractice {
      *   public static <T> List<T> arrayToList(T[] arr)
      */
     public static <T> List<T> arrayToList(T[] arr) {
-        throw new UnsupportedOperationException("TODO 2");
+        return new ArrayList<>(Arrays.asList(arr));
     }
 
     /**
@@ -45,7 +46,7 @@ public class GenericPractice {
     public static boolean sameRuntimeClass() {
         Box<String> s = new Box<>();
         Box<Integer> i = new Box<>();
-        throw new UnsupportedOperationException("TODO 3");
+        return s.getClass() == i.getClass();
     }
 
     // ==================================================================
