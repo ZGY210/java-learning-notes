@@ -38,7 +38,22 @@ public class MyBinarySearchTree {
      *       node 为 null 时新建节点；val < node.val 往左；val > node.val 往右；等于则忽略（去重）。
      */
     public void insert(int val) {
-        throw new UnsupportedOperationException("TODO 1");
+        root = insert(root, val);   // 根节点可能变（树为空时）
+    }
+
+    // 递归辅助方法
+    private Node insert(Node node, int val) {
+        if (node == null) {
+            size++;
+            return new Node(val);   // 走到空位，建新节点
+        }
+        if (val < node.val) {
+            node.left = insert(node.left, val);     // 往左
+        } else if (val > node.val) {
+            node.right = insert(node.right, val);   // 往右
+        }
+        // val == node.val：什么都不做，直接返回原节点 → 去重
+        return node;
     }
 
     /**
@@ -47,17 +62,44 @@ public class MyBinarySearchTree {
      *       val == node.val 返回 true；否则按大小去左/右子树找。
      */
     public boolean contains(int val) {
-        throw new UnsupportedOperationException("TODO 2");
+        return contains(root, val);   // 从根开始查
     }
+
+    // 递归辅助方法
+    private boolean contains(Node node, int val) {
+        if (node == null) {
+            return false;             // 走到空位，说明没找到
+        }
+        if (val == node.val) {
+            return true;              // 找到了
+        }
+        return val < node.val
+                ? contains(node.left, val)    // 小 → 左边找
+                : contains(node.right, val);  // 大 → 右边找
+    }
+
 
     /**
      * TODO 3 · 中序遍历：左 → 根 → 右，返回升序字符串（逗号分隔）。
      * 提示：递归 inOrder(Node node, StringBuilder sb)；先左、再当前、再右。
      */
     public String inOrder() {
-        throw new UnsupportedOperationException("TODO 3");
+        StringBuilder sb = new StringBuilder();
+        inOrder(root, sb);
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
     }
 
+    private void inOrder(Node node, StringBuilder sb) {
+        if (node == null) {
+            return;                    // 空节点直接返回，不返回 ""
+        }
+        inOrder(node.left, sb);        // ① 左
+        sb.append(node.val).append(",");  // ② 根
+        inOrder(node.right, sb);
+    }
     /** @return 节点个数 */
     public int size() {
         return size;
