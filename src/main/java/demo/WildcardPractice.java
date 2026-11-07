@@ -19,7 +19,11 @@ public class WildcardPractice {
      * 提示：里面只能 get（读），不能 add（写）。get 出来的类型是 Number。
      */
     public static double sum(List<? extends Number> list) {
-        throw new UnsupportedOperationException("TODO 1");
+        double sum = 0;
+        for (Number n : list) {
+            sum += n.doubleValue();
+        }
+        return sum;
     }
 
     /**
@@ -28,7 +32,9 @@ public class WildcardPractice {
      * 把 list 里现有元素个数作为返回值，方便自查。
      */
     public static int addIntegers(List<? super Integer> list) {
-        throw new UnsupportedOperationException("TODO 2");
+        list.add(1);
+        list.add(2);
+        return list.size();
     }
 
     /**
@@ -37,7 +43,7 @@ public class WildcardPractice {
      * 方法「往外拿」数据（生产）用 extends；方法「往里放」数据（消费）用 super。
      */
     public static String pecsRule() {
-        throw new UnsupportedOperationException("TODO 3");
+        return "PECS: Producer Extends, Consumer Super —— 往外拿数据（生产）用 extends，往里放数据（消费）用 super。";
     }
 
     // ==================================================================
