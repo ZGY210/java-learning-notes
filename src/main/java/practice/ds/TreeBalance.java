@@ -60,9 +60,14 @@ public class TreeBalance {
      *       height(node) = max(height(left), height(right)) + 1。
      */
     public static int height(Node node) {
-        throw new UnsupportedOperationException("TODO 1");
+        if (node == null) {
+            return -1;
+        } else {
+            int leftHeight = height(node.left);
+            int rightHeight = height(node.right);
+            return Math.max(leftHeight, rightHeight) + 1;
+        }
     }
-
     /**
      * TODO 2 · 是否平衡：左右子树高度差 ≤ 1，且左右子树各自也平衡。
      * 提示：空节点 → true；
@@ -70,7 +75,15 @@ public class TreeBalance {
      *       否则递归判断左右子树。
      */
     public static boolean isBalanced(Node node) {
-        throw new UnsupportedOperationException("TODO 2");
+        if (node == null) {
+            return true;
+        }
+        int leftHeight = height(node.left);
+        int rightHeight = height(node.right);
+        if (Math.abs(leftHeight - rightHeight) > 1) {
+            return false;
+        }
+        return isBalanced(node.left) && isBalanced(node.right);
     }
 
     // ==================================================================
