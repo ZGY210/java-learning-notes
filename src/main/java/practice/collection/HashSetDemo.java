@@ -227,6 +227,34 @@ public class HashSetDemo {
         return set.size();
     }
 
+    // ------------------------------------------------------------------
+    // 第三组：record 为什么不能当「不重写」的对照组（你 11/04 提出的问题）
+    // ------------------------------------------------------------------
+
+    /**
+     * record 会自动生成 equals / hashCode / toString，规则是：
+     *   「所有组件（这里是 name）都相等 → equals 返回 true」
+     *   而且 hashCode 用组件算，所以两个内容相同的 record 天然落在同一个桶。
+     *
+     * 结论：record 天生就能被 HashSet 去重，因此**不能**用来演示「不重写会怎样」。
+     * 你当时把 record UserRaw 注释掉、改回普通 class，这个判断是完全正确的。
+     */
+    record UserRecord(String name) {
+    }
+
+    /** record 不写任何方法，也能去重 → size == 1 */
+    static int dedupRecord() {
+        Set<UserRecord> set = new HashSet<>();
+        set.add(new UserRecord("张三"));
+        set.add(new UserRecord("张三"));
+        return set.size();
+    }
+
+    /** 顺手验一下 record 的 equals：两个内容相同的 record，equals 为 true */
+    static boolean recordEqualsWorks() {
+        return new UserRecord("张三").equals(new UserRecord("张三"));
+    }
+
     // ==================================================================
     // 自测（不用改，填完 TODO 直接跑）
     // ==================================================================
@@ -290,10 +318,14 @@ public class HashSetDemo {
             return before && !s.contains("x") && s.isEmpty();
         });
 
+        t("11 record 不写任何方法也能去重（期望 size == 1）", () -> dedupRecord() == 1);
+
+        t("12 record 的 equals 自动可用（期望 true）", () -> recordEqualsWorks());
+
         System.out.println("------------------------------------------------------------");
         System.out.printf("结果：PASS %d / FAIL %d%n", pass, fail);
         if (fail == 0) {
-            System.out.println("ALL GREEN（10/10）—— 可以去写笔记和 LeetCode 了");
+            System.out.println("ALL GREEN（12/12）—— 可以去写笔记和 LeetCode 了");
         } else {
             System.out.println("还有 " + fail + " 项没过，先别 commit");
         }
