@@ -1,12 +1,6 @@
 package practice.collection;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -33,7 +27,12 @@ public class HashSetDemo {
      * 期望：4（重复的 1 和 2 只留一份）
      */
     static int collectDuplicates() {
-        throw new UnsupportedOperationException("TODO 1 未实现");
+        Set<Integer> set = new HashSet<>();
+        int[] nums = {1, 2, 3, 2, 1, 4};
+        for (int n : nums) {
+            set.add(n);
+        }
+        return set.size();
     }
 
     /**
@@ -45,7 +44,13 @@ public class HashSetDemo {
      * 这个返回值是很多业务幂等逻辑的基础（插入成功才发通知）。
      */
     static boolean[] addReturnValues() {
-        throw new UnsupportedOperationException("TODO 2 未实现");
+        Set<String> set = new HashSet<>();
+        String[] words = {"a", "a", "b"};
+        boolean[] result = new boolean[words.length];
+        for (int i = 0; i < words.length; i++) {
+            result[i] = set.add(words[i]);
+        }
+        return result;
     }
 
     /**
@@ -54,7 +59,12 @@ public class HashSetDemo {
      * 期望：1（HashSet 允许一个 null，不允许两个）
      */
     static int nullCount() {
-        throw new UnsupportedOperationException("TODO 3 未实现");
+        Set<String> set = new HashSet<>();
+        String[] nums = {null, null};
+        for (String n : nums) {
+            set.add(n);
+        }
+        return set.size();
     }
 
     /**
@@ -67,7 +77,11 @@ public class HashSetDemo {
      * 很多人被「1,2,3 加进去遍历出来也是 1,2,3」骗过，以为 HashSet 有序。
      */
     static List<Integer> hashSetOrderBig() {
-        throw new UnsupportedOperationException("TODO 4 未实现");
+        Set<Integer> set = new HashSet<>();
+        set.add(100);
+        set.add(2);
+        set.add(55);
+        return new ArrayList<>(set);
     }
 
     /**
@@ -76,7 +90,11 @@ public class HashSetDemo {
      * 期望：[3, 1, 2]（LinkedHashSet 额外维护了一条双向链表记录插入顺序）
      */
     static List<Integer> linkedSetOrder() {
-        throw new UnsupportedOperationException("TODO 5 未实现");
+        Set<Integer> set = new LinkedHashSet<>();
+        set.add(3);
+        set.add(1);
+        set.add(2);
+        return new ArrayList<>(set);
     }
 
     // ==================================================================
@@ -93,7 +111,18 @@ public class HashSetDemo {
      * 复杂度：O(n + m)，比双重 for 的 O(n*m) 快一个量级。
      */
     static Set<Integer> intersection(int[] a, int[] b) {
-        throw new UnsupportedOperationException("TODO 6 未实现");
+        Set<Integer> setA = new HashSet<>();
+        for (int x : a) {
+            setA.add(x);          // a 里有重复也会被自动去重
+        }
+
+        Set<Integer> result = new HashSet<>();
+        for (int y : b) {
+            if (setA.contains(y)) {
+                result.add(y);    // b 里的重复元素也只进一次
+            }
+        }
+        return result;
     }
 
     /**
@@ -104,7 +133,11 @@ public class HashSetDemo {
      * 提示：这里必须用 LinkedHashSet —— 用 HashSet 顺序就乱了。
      */
     static List<String> uniqueInOrder(String[] words) {
-        throw new UnsupportedOperationException("TODO 7 未实现");
+        Set<String> set = new LinkedHashSet<>();
+        for (String w : words) {
+            set.add(w);
+        }
+        return new ArrayList<>(set);
     }
 
     // ==================================================================
@@ -112,46 +145,67 @@ public class HashSetDemo {
     // 这是这一天最值钱的部分，也是面试最爱追问的点。
     // ==================================================================
 
-    /** 对照组：故意不重写 hashCode / equals。加两个「内容相同」的对象，去不了重。 */
-    static class UserRaw {
-        final String name;
-
-        UserRaw(String name) {
-            this.name = name;
-        }
+    /**
+     * 对照组：故意不重写 hashCode / equals。加两个「内容相同」的对象，去不了重。
+     */
+       /** record UserRaw(String name) {
 
         @Override
-        public String toString() {
-            return "UserRaw(" + name + ")";
-        }
-    }
+            public String toString() {
+                return "UserRaw(" + name + ")";
+            }
+        }**/
+       static class UserRaw {
+           private final String name;
 
-    /** 实验组：你来补 hashCode 和 equals，补完后同内容对象就能去重。 */
-    static class User {
-        final String name;
+           UserRaw(String name) {
+               this.name = name;
+           }
 
-        User(String name) {
-            this.name = name;
-        }
+           @Override
+           public String toString() {
+               return "UserRaw(" + name + ")";
+           }
+       }
 
-        // TODO 8
-        // 在这里补：@Override public int hashCode()
-        //   要求用 Objects.hash(name) 实现。
-        //   为什么需要它：HashSet 先用 hashCode 算出桶下标，桶里才比较 equals。
-        //   如果两个「相等」的对象 hashCode 不同，它们会被放进不同桶，永远碰不到面。
+    /**
+     * 实验组：你来补 hashCode 和 equals，补完后同内容对象就能去重。
+     */
+        record User(String name) {
 
-        // TODO 9
-        // 在这里补：@Override public boolean equals(Object o)
-        //   要求：
-        //     - o == this 直接返回 true（性能优化，也是规范）
-        //     - o == null 或 getClass() != o.getClass() 返回 false
-        //     - 强转后比较 name，用 Objects.equals(this.name, ((User) o).name)
-
+        //
+            // 在这里补：@Override public int hashCode()
+            //   要求用 Objects.hash(name) 实现。
+            //   为什么需要它：HashSet 先用 hashCode 算出桶下标，桶里才比较 equals。
+            //   如果两个「相等」的对象 hashCode 不同，它们会被放进不同桶，永远碰不到面。
         @Override
-        public String toString() {
-            return "User(" + name + ")";
+        public int hashCode() {
+            return Objects.hash(name);
         }
-    }
+
+            //
+            // 在这里补：@Override public boolean equals(Object o)
+            //   要求：
+            //     - o == this 直接返回 true（性能优化，也是规范）
+            //     - o == null 或 getClass() != o.getClass() 返回 false
+            //     - 强转后比较 name，用 Objects.equals(this.name, ((User) o).name)
+            @Override
+            public boolean equals(Object o) {
+                if (o == this) {
+                    return true;                       // 同一引用，直接 true
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;                      // null 或类型不同
+                }
+                User other = (User) o;                 // 强转
+                return Objects.equals(this.name, other.name);
+            }
+
+            @Override
+            public String toString() {
+                return "User(" + name + ")";
+            }
+        }
 
     /** 不重写的情况：两个 UserRaw("张三") 都会留在 Set 里 → size == 2 */
     static int dedupRaw() {
