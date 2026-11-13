@@ -49,7 +49,8 @@ public class TreeSetDemo {
          */
         @Override
         public int compareTo(Student o) {
-            throw new UnsupportedOperationException("TODO 1 未实现");
+            int ageDiff = this.age - o.age;
+            return ageDiff==0?this.name.compareTo(o.name):ageDiff;
         }
     }
 
@@ -65,7 +66,16 @@ public class TreeSetDemo {
      * 期望：["李四(20)", "赵六(20)", "张三(22)", "王五(25)"]
      */
     static List<String> naturalOrder() {
-        throw new UnsupportedOperationException("TODO 2 未实现");
+        TreeSet<Student> set = new TreeSet<>();
+        set.add(new Student("张三", 22));
+        set.add(new Student("李四", 20));
+        set.add(new Student("王五", 25));
+        set.add(new Student("赵六", 20));
+        List<String> list = new ArrayList<>();
+        for (Student student : set) {
+            list.add(student.toString());
+        }
+        return list;
     }
 
     /**
@@ -77,7 +87,22 @@ public class TreeSetDemo {
      * 期望：["王五(25)", "张三(22)", "李四(20)", "赵六(20)"]
      */
     static List<String> comparatorOrder() {
-        throw new UnsupportedOperationException("TODO 3 未实现");
+        TreeSet<Student> set = new TreeSet<>(new Comparator<Student>() {
+            @Override
+            public int compare(Student o1, Student o2) {
+                int i= Integer.compare(o2.age,o1.age);
+                return i==0?o1.name.compareTo(o2.name):i;
+            }
+        });
+        set.add(new Student("张三", 22));
+        set.add(new Student("李四", 20));
+        set.add(new Student("王五", 25));
+        set.add(new Student("赵六", 20));
+        List<String> list = new ArrayList<>();
+        for (Student student : set) {
+            list.add(student.toString());
+        }
+        return list;
     }
 
     // ==================================================================
@@ -96,7 +121,10 @@ public class TreeSetDemo {
      *      所以 TreeSet 的「重复」定义是 **compareTo == 0**，与 equals 无关。
      */
     static int dedupByCompareTo() {
-        throw new UnsupportedOperationException("TODO 4 未实现");
+        TreeSet<Student> set = new TreeSet<>();
+        set.add(new Student("张三", 20));
+        set.add(new Student("张三", 20));
+        return set.size();
     }
 
     /**
@@ -109,7 +137,9 @@ public class TreeSetDemo {
      *      但 contains 依然返回 true —— TreeSet 的查找走的是 compareTo 的二叉搜索，不是 equals。
      */
     static boolean containsByCompareTo() {
-        throw new UnsupportedOperationException("TODO 5 未实现");
+        TreeSet<Student> set = new TreeSet<>();
+        set.add(new Student("张三", 20));
+        return set.contains(new Student("张三", 20));
     }
 
     // ==================================================================
@@ -126,7 +156,14 @@ public class TreeSetDemo {
      *      （对照：HashSet 允许一个 null，因为它是算 hashCode。）
      */
     static boolean nullRejected() {
-        throw new UnsupportedOperationException("TODO 6 未实现");
+        TreeSet<Integer> set = new TreeSet<>();
+        try {
+            set.add(1);
+            set.add(null);
+            return false;                          // 没抛异常，说明被接受了
+        } catch (NullPointerException e) {
+            return true;                           // 确实抛了 NPE
+        }
     }
 
     /**
@@ -139,7 +176,12 @@ public class TreeSetDemo {
      *          lower / higher 是严格小于 / 严格大于，边界上会和你以为的不一样。
      */
     static int[] floorCeiling() {
-        throw new UnsupportedOperationException("TODO 7 未实现");
+        TreeSet<Integer> set = new TreeSet<>();
+        set.add(10);
+        set.add(20);
+        set.add(30);
+        set.add(40);
+        return new int[]{set.floor(25), set.ceiling(25)};
     }
 
     /**
@@ -150,7 +192,11 @@ public class TreeSetDemo {
      * 提示：TreeSet 天生就去重 + 排序，这是它比「先 HashSet 再去 Collections.sort」更省事的地方。
      */
     static List<Integer> dedupAndSort(int[] arr) {
-        throw new UnsupportedOperationException("TODO 8 未实现");
+        TreeSet<Integer> set = new TreeSet<>();
+        for(int i : arr) {
+            set.add(i);
+        }
+        return new ArrayList<>(set);
     }
 
     // ==================================================================
