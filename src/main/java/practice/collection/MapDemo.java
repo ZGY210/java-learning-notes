@@ -40,7 +40,11 @@ public class MapDemo {
      *      而是把结果排序后再比。这一点（无序）今天要写进笔记。
      */
     static Map<String, Integer> build() {
-        throw new UnsupportedOperationException("TODO 1 未实现");
+        Map<String, Integer> map = new HashMap<>();
+        map.put("语文", 90);
+        map.put("数学", 95);
+        map.put("英语", 88);
+        return map;
     }
 
     // ==================================================================
@@ -56,7 +60,11 @@ public class MapDemo {
      *      能说出「为什么慢」是今天的加分点。
      */
     static List<String> traverseByKeySet(Map<String, Integer> map) {
-        throw new UnsupportedOperationException("TODO 2 未实现");
+        List<String> res = new ArrayList<>();
+        for(String key : map.keySet()) {
+            res.add(key + "=" + map.get(key));
+        }
+        return res;
     }
 
     // ==================================================================
@@ -69,7 +77,11 @@ public class MapDemo {
      * 这是**实际开发最推荐**的写法：一次遍历同时拿到 key 和 value，不用二次查找。
      */
     static List<String> traverseByEntry(Map<String, Integer> map) {
-        throw new UnsupportedOperationException("TODO 3 未实现");
+        List<String> res = new ArrayList<>();
+        for(Map.Entry<String, Integer> entry : map.entrySet()) {
+            res.add(entry.getKey() + "=" + entry.getValue());
+        }
+        return res;
     }
 
     // ==================================================================
@@ -82,7 +94,9 @@ public class MapDemo {
      *      所以你要往一个**已经在外面创建好**的 List 里 add。
      */
     static List<String> traverseByLambda(Map<String, Integer> map) {
-        throw new UnsupportedOperationException("TODO 4 未实现");
+        List<String> res = new ArrayList<>();
+        map.forEach((s, integer) -> res.add(s + "=" + integer));
+        return res;
     }
 
     // ==================================================================
@@ -100,7 +114,26 @@ public class MapDemo {
      * 用一个新的 HashMap 来做，别污染 build() 的结果。
      */
     static boolean apiBehaviors() {
-        throw new UnsupportedOperationException("TODO 5 未实现");
+       Map<String, Integer> map = new HashMap<>();
+        Object r1 = map.put("新key", 1);
+        boolean c1 = (r1 == null);
+
+        // 2. key 已存在时 put 返回旧值 1（不是 null）
+        Integer r2 = map.put("新key", 2);
+        boolean c2 = (r2 != null && r2 == 1);
+
+        // 3. getOrDefault 对不存在的 key 返回默认值 -1
+        Integer r3 = map.getOrDefault("不存在", -1);
+        boolean c3 = (r3 == -1);
+
+        // 4. containsKey / containsValue
+        boolean c4 = map.containsKey("新key") && map.containsValue(2);
+
+        // 5. remove 返回被删的值，删完 containsKey 为 false
+        Integer r5 = map.remove("新key");
+        boolean c5 = (r5 != null && r5 == 2) && !map.containsKey("新key");
+
+        return c1 && c2 && c3 && c4 && c5;
     }
 
     // ==================================================================
@@ -113,7 +146,11 @@ public class MapDemo {
      * 提示：如果某个 value 是 null 会 NPE —— 想想为什么实际业务里很少往 Map 里放 null。
      */
     static int sumValues(Map<String, Integer> map) {
-        throw new UnsupportedOperationException("TODO 6 未实现");
+        int sum = 0;
+        for(Map.Entry<String, Integer> entry : map.entrySet()) {
+            sum += entry.getValue();
+        }
+        return sum;
     }
 
     // ==================================================================
