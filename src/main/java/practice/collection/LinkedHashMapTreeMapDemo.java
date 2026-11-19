@@ -1,13 +1,6 @@
 package practice.collection;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * 2026-11-18 任务：LinkedHashMap 保序 + TreeMap 排序与范围查询
@@ -41,7 +34,12 @@ public class LinkedHashMapTreeMapDemo {
      * ⚠️ 这就是 LinkedHashMap 的默认模式：{@code accessOrder = false}（按插入顺序）。
      */
     static List<String> linkedKeepsInsertOrder() {
-        throw new UnsupportedOperationException("TODO 1 未实现");
+        Map<String, Integer> map = new LinkedHashMap<>();   // accessOrder 默认 false
+        map.put("D", 1);
+        map.put("A", 2);
+        map.put("C", 3);
+        map.put("B", 4);
+        return new ArrayList<>(map.keySet());
     }
 
     // ==================================================================
@@ -65,7 +63,22 @@ public class LinkedHashMapTreeMapDemo {
      *      所以淘汰永远发生在**第一个**元素上。
      */
     static List<String> lruByAccessOrder() {
-        throw new UnsupportedOperationException("TODO 2 未实现");
+        final int CAPACITY = 3;
+
+        Map<String, Integer> lru = new LinkedHashMap<>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, Integer> eldest) {
+                return size() > CAPACITY;   // 超容量时淘汰链表头（最久未使用）
+            }
+        };
+
+        lru.put("a", 1);
+        lru.put("b", 2);
+        lru.put("c", 3);
+        lru.get("a");       // a 变成"最近使用"，挪到尾部
+        lru.put("d", 4);    // 插入 d 后 size=4 > 3，淘汰最旧的 b
+
+        return new ArrayList<>(lru.keySet());
     }
 
     // ==================================================================
@@ -81,7 +94,14 @@ public class LinkedHashMapTreeMapDemo {
      *    而又没实现 Comparable、也没传 Comparator，put 时会抛 ClassCastException。
      */
     static List<Integer> treeMapNaturalOrder() {
-        throw new UnsupportedOperationException("TODO 3 未实现");
+        Map<Integer, String> map = new TreeMap<>();
+        map.put(42, "forty-two");
+        map.put(7,  "seven");
+        map.put(99, "ninety-nine");
+        map.put(1,  "one");
+        map.put(25, "twenty-five");
+
+        return new ArrayList<>(map.keySet());
     }
 
     // ==================================================================
@@ -96,7 +116,15 @@ public class LinkedHashMapTreeMapDemo {
      * 这一点和 HashMap 完全不同，是 TreeMap 最容易踩的坑。
      */
     static List<Integer> treeMapDescending() {
-        throw new UnsupportedOperationException("TODO 4 未实现");
+        Map<Integer, String> map = new TreeMap<>(Comparator.reverseOrder());
+
+        map.put(42, "forty-two");
+        map.put(7,  "seven");
+        map.put(99, "ninety-nine");
+        map.put(1,  "one");
+        map.put(25, "twenty-five");
+
+        return new ArrayList<>(map.keySet());   // [99, 42, 25, 7, 1]
     }
 
     // ==================================================================
@@ -117,7 +145,20 @@ public class LinkedHashMapTreeMapDemo {
      *    但 firstKey/lastKey 在空 map 上会抛 NoSuchElementException。
      */
     static List<Integer> floorCeiling() {
-        throw new UnsupportedOperationException("TODO 5 未实现");
+        NavigableMap<Integer, String> map = new TreeMap<>();
+        map.put(10, "ten");
+        map.put(20, "twenty");
+        map.put(30, "thirty");
+        map.put(40, "forty");
+        map.put(50, "fifty");
+
+        return List.of(
+                map.floorKey(25),
+                map.ceilingKey(25),
+                map.floorKey(30),
+                map.firstKey(),
+                map.lastKey()
+        );
     }
 
     // ==================================================================
@@ -132,7 +173,14 @@ public class LinkedHashMapTreeMapDemo {
      *      「某时间段内的订单」—— 这正是数据库索引要干的事，TreeMap 就是内存里的 B+ 树近似）
      */
     static List<Integer> subMapRange() {
-        throw new UnsupportedOperationException("TODO 6 未实现");
+        NavigableMap<Integer, String> map = new TreeMap<>();
+        map.put(10, "ten");
+        map.put(20, "twenty");
+        map.put(30, "thirty");
+        map.put(40, "forty");
+        map.put(50, "fifty");
+
+        return new ArrayList<>(map.subMap(20, true, 40, false).keySet());
     }
 
     // ==================================================================
@@ -152,7 +200,18 @@ public class LinkedHashMapTreeMapDemo {
      *    **不是** equals！所以两个年龄姓名都一样的学生，后 put 的会覆盖前一个。
      */
     static List<String> treeMapCustomKey() {
-        throw new UnsupportedOperationException("TODO 7 未实现");
+        Map<Student2, String> map = new TreeMap<>();   // 走 Student 的自然排序
+
+        map.put(new Student2("Tom",   20), "A");
+        map.put(new Student2("Alice", 18), "B");
+        map.put(new Student2("Bob",   20), "C");
+        map.put(new Student2("Jack",  22), "D");
+
+        List<String> names = new ArrayList<>();
+        for (Student2 s : map.keySet()) {
+            names.add(s.getName());   // ← 注意是 getName()，不是 s.name()
+        }
+        return names;    // [Alice, Bob, Tom, Jack]
     }
 
     // ==================================================================
@@ -285,7 +344,9 @@ class Student2 implements Comparable<Student2> {
     }
 
     @Override
-    public int compareTo(Student2 o) {
-        throw new UnsupportedOperationException("TODO 7 未实现：compareTo —— 先比 age，再比 name");
+    public int compareTo(Student2 other) {
+        int byAge = Integer.compare(this.age, other.age);   // ① 年龄升序
+        if (byAge != 0) return byAge;
+        return this.name.compareTo(other.name);
     }
 }

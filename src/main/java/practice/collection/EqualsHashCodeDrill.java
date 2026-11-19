@@ -1,9 +1,6 @@
 package practice.collection;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 2026-11-18 加练：手写 equals 与 hashCode（不许用 IDEA 生成）
@@ -39,7 +36,10 @@ public class EqualsHashCodeDrill {
      *    但面试官会看出来你不熟。
      */
     static boolean EQUALS_TODO(Employee a, Object o) {
-        throw new UnsupportedOperationException("TODO 1 未实现");
+        if (a == o) return true;
+        if (o == null || !(o instanceof Employee)) return false;
+        Employee other = (Employee) o;
+        return a.id == other.id && Objects.equals(a.name, other.name);
     }
 
     // ==================================================================
@@ -61,7 +61,9 @@ public class EqualsHashCodeDrill {
      *    多算一个少算一个，都会让 HashSet/HashMap 出错。
      */
     static int HASHCODE_TODO(Employee e) {
-        throw new UnsupportedOperationException("TODO 2 未实现");
+        int result = e.id;
+        result = 31 * result + (e.name == null ? 0 : e.name.hashCode());
+        return result;
     }
 
     // ==================================================================
