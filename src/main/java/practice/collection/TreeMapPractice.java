@@ -2,6 +2,7 @@ package practice.collection;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 2026-11-19 手写任务 · TreeMap 练习二 / 练习三（对应黑马「209 键位置添加自定义对象」「210 利用 TreeMap 进行统计」）
@@ -25,7 +26,13 @@ public class TreeMapPractice {
      * 返回排好序的姓名列表（每项形如 "张三(20)"）。
      */
     static List<String> sortByAgeThenName(List<Student3> list) {
-        throw new UnsupportedOperationException("TODO 1");
+        Comparator<Student3> cmp = Comparator
+                .comparingInt(Student3::getAge)
+                .thenComparing(Student3::getName);
+        return list.stream()
+                .sorted(cmp)
+                .map(Student3::toString)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -34,7 +41,14 @@ public class TreeMapPractice {
      * 返回排好序的姓名列表（每项形如 "张三(20)"）。
      */
     static List<String> naturalOrderCustomKey() {
-        throw new UnsupportedOperationException("TODO 2");
+        TreeMap<Student3, String> map = new TreeMap<>();
+        map.put(new Student3("张三", 20), null);
+        map.put(new Student3("王五", 20), null);
+        map.put(new Student3("李四", 22), null);
+
+        return map.keySet().stream()
+                .map(Student3::toString)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -47,7 +61,12 @@ public class TreeMapPractice {
      * 想一想：两个不同的人，为什么进去只剩一个？谁被谁覆盖了？
      */
     static int dedupByCompareTo() {
-        throw new UnsupportedOperationException("TODO 3");
+        TreeMap<Student3, String> map = new TreeMap<>(Comparator.comparingInt(Student3::getAge));
+
+        map.put(new Student3("张三", 20), "第一个");
+        map.put(new Student3("王五", 20), "第二个");
+
+        return map.size();   // 1
     }
 
     /**
@@ -56,7 +75,14 @@ public class TreeMapPractice {
      * 提示：按非字母数字切分、转小写、忽略空串。
      */
     static List<String> wordFrequencySorted(String text) {
-        throw new UnsupportedOperationException("TODO 4");
+        Map<String, Integer> freq = new TreeMap<>();   // TreeMap 天然按键（单词）字典序
+        for (String w : text.toLowerCase().split("[^a-z0-9]+")) {
+            if (w.isEmpty()) continue;                 // 忽略空串
+            freq.merge(w, 1, Integer::sum);
+        }
+        return freq.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -64,7 +90,13 @@ public class TreeMapPractice {
      * 输入 "banana"，返回 ["a=3", "b=1", "n=2"]。
      */
     static List<String> charFrequencySorted(String text) {
-        throw new UnsupportedOperationException("TODO 5");
+        Map<Character, Integer> freq = new TreeMap<>();  // Character 实现 Comparable，键天然升序
+        for (char c : text.toCharArray()) {
+            freq.merge(c, 1, Integer::sum);
+        }
+        return freq.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -78,7 +110,19 @@ public class TreeMapPractice {
      * 想一想：为什么用 TreeMap&lt;Integer,...&gt; 而不是 TreeMap&lt;Student3,...&gt; 做这件事？
      */
     static List<String> ageBetween(List<Student3> list, int from, int to) {
-        throw new UnsupportedOperationException("TODO 6");
+        Map<Integer, List<String>> buckets = new TreeMap<>();
+        for (Student3 s : list) {
+            buckets.computeIfAbsent(s.getAge(), k -> new ArrayList<>()).add(s.getName());
+        }
+
+        // 2. subMap(from, true, to, false)：左闭右开 [from, to)
+        List<String> res = new ArrayList<>();
+        for (Map.Entry<Integer, List<String>> e : ((TreeMap<Integer, List<String>>) buckets).subMap(from, true, to, false).entrySet()) {
+            for (String name : e.getValue()) {
+                res.add(name + "(" + e.getKey() + ")");   // 拍平成 "姓名(年龄)"
+            }
+        }
+        return res;
     }
 
     // ==================== Student3：compareTo 留给你 ====================
@@ -106,7 +150,7 @@ public class TreeMapPractice {
          */
         @Override
         public int compareTo(Student3 o) {
-            throw new UnsupportedOperationException("TODO：写出 Student3.compareTo");
+            return Integer.compare(age, o.age) != 0 ? Integer.compare(age, o.age) : name.compareTo(o.name);
         }
     }
 
