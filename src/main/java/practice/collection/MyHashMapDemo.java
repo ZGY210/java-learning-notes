@@ -64,7 +64,7 @@ public class MyHashMapDemo {
      *      把高 16 位「掺」到低 16 位，就等于让高位也参与定位，减少冲突。
      */
     static int hash(int key) {
-        throw new UnsupportedOperationException("TODO 1 未实现");
+        return key^(key>>>16);
     }
 
     // ==================================================================
@@ -75,6 +75,7 @@ public class MyHashMapDemo {
      *
      * 标准写法：return hash & (capacity - 1);
      *
+     *
      * 为什么能用 & 代替 % ？
      *   —— 当 capacity 是 2 的幂时，capacity-1 的二进制是「全 1」，
      *      此时 hash & (capacity-1) 与 hash % capacity 结果完全相同，但位运算快得多。
@@ -83,7 +84,7 @@ public class MyHashMapDemo {
      *      2、3、4、5、6、7 这几个桶永远用不到，冲突率暴涨。这就是「2 的幂」的意义。
      */
     static int indexFor(int hash, int capacity) {
-        throw new UnsupportedOperationException("TODO 2 未实现");
+        return hash & (capacity - 1);
     }
 
     // ==================================================================
@@ -104,7 +105,23 @@ public class MyHashMapDemo {
      *          否则同一个 key 会真的插两条，size 也会加错。
      */
     void put(int key, int value) {
-        throw new UnsupportedOperationException("TODO 3 未实现");
+        int hash = hash(key);
+        int index = indexFor(hash, table.length);
+        Node x= table[index];
+        while (x != null) {
+            if (x.key == key) {        // 比 key，不是比 hash
+                x.value = value;       // 覆盖，size 不变
+                return;
+            }
+            x = x.next;
+        }
+        Node newNode = new Node(hash, key, value, x.next);
+        table[index] = newNode;
+        size++;
+
+        if (size > threshold) {
+            resize();
+        }
     }
 
     // ==================================================================
