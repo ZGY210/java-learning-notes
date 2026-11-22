@@ -60,7 +60,13 @@ public class LinkedListDrill {
     //   顺序反了会怎样？（这题答不出来说明还没真懂 —— 写进 notes/16 的问题里）
     // ==================================================================
     void addFirst(int v) {
-        throw new UnsupportedOperationException("TODO 1");
+        Node newNode = new Node(v);
+        Node cur = head.next;
+        newNode.next = cur;
+        newNode.prev = head;
+        cur.prev = newNode;
+        head.next=newNode;
+        size++;
     }
 
     // ==================================================================
@@ -72,7 +78,13 @@ public class LinkedListDrill {
     // 另外：摘掉之后 size 要处理。
     // ==================================================================
     void remove(Node n) {
-        throw new UnsupportedOperationException("TODO 2");
+        Node prev = n.prev;
+        Node next = n.next;
+        n.prev = null;
+        n.next = null;
+        prev.next = next;
+        next.prev = prev;
+        size--;
     }
 
     // ==================================================================
@@ -81,7 +93,13 @@ public class LinkedListDrill {
     // 注意：循环条件是「节点 != tail」，不是「节点 != null」。
     // ==================================================================
     List<Integer> toListForward() {
-        throw new UnsupportedOperationException("TODO 3");
+       Node cur = head.next;
+       List<Integer> list = new ArrayList<>();
+       while (cur != tail) {
+           list.add(cur.val);
+           cur = cur.next;
+       }
+       return list;
     }
 
     // ==================================================================
@@ -91,7 +109,13 @@ public class LinkedListDrill {
     // 说明你某个 4 行赋值里漏了 prev。
     // ==================================================================
     List<Integer> toListBackward() {
-        throw new UnsupportedOperationException("TODO 4");
+        Node cur = tail.prev;
+        List<Integer> list = new ArrayList<>();
+        while (cur != head) {
+            list.add(cur.val);
+            cur = cur.prev;
+        }
+        return list;
     }
 
     // ==================================================================
@@ -103,7 +127,15 @@ public class LinkedListDrill {
     // 那么为什么 LRU 还要额外存一个 int key 字段？（昨天那道题的第一问）
     // ==================================================================
     boolean removeValue(int v) {
-        throw new UnsupportedOperationException("TODO 5");
+       Node cur = head.next;
+       while (cur != tail) {
+           if (cur.val==v) {
+               remove(cur);
+               return true;
+           }
+           cur = cur.next;
+       }
+       return false;
     }
 
     /** size 由 add/remove 维护，你只要保证 addFirst 和 remove 都改对了它。 */

@@ -108,18 +108,22 @@ public class MyHashMapDemo {
         int hash = hash(key);
         int index = indexFor(hash, table.length);
         Node x= table[index];
+        Node prev = null;
         while (x != null) {
             if (x.key == key) {        // 比 key，不是比 hash
                 x.value = value;       // 覆盖，size 不变
                 return;
             }
+            prev = x;
             x = x.next;
         }
-        Node newNode = new Node(hash, key, value, x.next);
-        table[index] = newNode;
-        size++;
-
-        if (size > threshold) {
+        Node newNode = new Node(hash, key, value, null);
+        if (prev == null) {
+            table[index] = newNode;   // 桶本来是空的
+        } else {
+            prev.next = newNode;      // 挂到链尾
+        }
+        if (++size > threshold) {
             resize();
         }
     }
@@ -135,7 +139,16 @@ public class MyHashMapDemo {
      *   4. 找不到 → 返回 null（注意返回类型是 Integer 不是 int，这样才能表示「不存在」）
      */
     Integer get(int key) {
-        throw new UnsupportedOperationException("TODO 4 未实现");
+        int hash = hash(key);
+        int index = indexFor(hash, table.length);
+        Node x= table[index];
+        while (x != null) {
+            if (x.key == key) {
+                return x.value;
+            }
+            x = x.next;
+        }
+        return null;
     }
 
     // ==================================================================
@@ -157,7 +170,20 @@ public class MyHashMapDemo {
      *   5. threshold = newCap * LOAD_FACTOR   ← 忘了这行会一直扩容
      */
     void resize() {
-        throw new UnsupportedOperationException("TODO 5 未实现");
+        int newCapacity = table.length * 2;
+        Node[] newTable = new Node[newCapacity];
+        for (int i = 0; i < table.length; i++) {
+            Node x = table[i];
+            while (x != null) {
+                Node next = x.next;
+                int index = indexFor(x.hash, newCapacity);
+                x.next = newTable[index];                // 头插：接到新桶原链首
+                newTable[index] = x;                     // 新桶首换成 x
+                x = next;
+            }
+        }
+        table = newTable;
+        threshold = (int) (newCapacity * LOAD_FACTOR);
     }
 
     // ==================================================================
