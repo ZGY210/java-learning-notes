@@ -40,7 +40,7 @@ public class HashMapDeepen {
     // 为什么要这么干？（写进 notes/16 第三节）
     // ==================================================================
     static int spread(int h) {
-        throw new UnsupportedOperationException("TODO 1");
+        return h^(h>>>16);
     }
 
     // ==================================================================
@@ -53,7 +53,7 @@ public class HashMapDeepen {
     //    （提示：负数取模在 Java 里是负数；位运算没有这个问题；而且 & 比 % 快）
     // ==================================================================
     static int indexOf(int hash, int cap) {
-        throw new UnsupportedOperationException("TODO 2");
+        return hash & (cap-1);
     }
 
     // ==================================================================
@@ -66,7 +66,21 @@ public class HashMapDeepen {
     //       这就是「为什么需要扰动」和「为什么会树化」的入口。
     // ==================================================================
     static TreeMap<Integer, List<Integer>> bucketOf(int[] keys, int cap) {
-        throw new UnsupportedOperationException("TODO 3");
+        TreeMap<Integer, List<Integer>> map = new TreeMap<>();
+
+        for (int i = 0; i < keys.length; i++) {
+            int key = keys[i];
+            int idx = key & (cap - 1);      // 桶下标，复用 TODO 2 的公式
+
+            // 这个桶还没有 List，就先建一个
+            if (!map.containsKey(idx)) {
+                map.put(idx, new ArrayList<>());
+            }
+            // 再把 key 追加进这个桶
+            map.get(idx).add(key);
+        }
+
+        return map;
     }
 
     // ==================================================================
@@ -84,7 +98,19 @@ public class HashMapDeepen {
     //              扩到 32 后 48 和 16 跑到 16 号桶 —— 这就是「下标差一个 oldCap」。
     // ==================================================================
     static int rehashDiff(int[] keys) {
-        throw new UnsupportedOperationException("TODO 4");
+        int oldCap = 16;
+        int newCap = 32;
+        int count = 0;
+
+        for (int i = 0; i < keys.length; i++) {
+            int oldIdx = indexOf(keys[i], oldCap);   // 复用 TODO 2
+            int newIdx = indexOf(keys[i], newCap);
+
+            if (oldIdx != newIdx) {
+                count++;
+            }
+        }
+        return count;
     }
 
     // ==================================================================
