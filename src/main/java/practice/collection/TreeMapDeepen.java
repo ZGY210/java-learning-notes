@@ -5,7 +5,6 @@ import java.util.TreeMap;
 
 /**
  * TreeMap 源码靶场（2026-11-23）
- *
  * ============================ 一点背景 ============================
  * HashMap 你从「会写」练到了「会讲」（HashMapDeepen 8/8）。
  * TreeMap 的源码比 HashMap 短，但它底下的东西更硬：**红黑树**。
@@ -35,7 +34,24 @@ public class TreeMapDeepen {
     // 提示：lo=0, hi=len-1，while(lo<=hi)，每次 mid=(lo+hi)>>>1，count++。
     // ==================================================================
     static int binarySearchSteps(int[] sorted, int target) {
-        throw new UnsupportedOperationException("TODO 1");
+        int lo = 0;
+        int hi = sorted.length - 1;
+        int count = 0;
+
+        while (lo <= hi) {
+            int mid = (lo + hi) >>> 1;  // 无符号右移，等价于 (lo+hi)/2，防溢出
+            count++;
+
+            if (sorted[mid] == target) {
+                return count;
+            } else if (sorted[mid] < target) {
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+
+        return -1;  // 没找到
     }
 
     // ==================================================================
@@ -54,7 +70,19 @@ public class TreeMapDeepen {
     // 这题答对，你就永远不会在面试里说错「TreeMap 靠什么去重」。
     // ==================================================================
     static int treeMapUsesCompareTo() {
-        throw new UnsupportedOperationException("TODO 2");
+        Comparator<EvilKey> byId = new Comparator<EvilKey>() {
+            public int compare(EvilKey a, EvilKey b) {
+                return Integer.compare(a.id, b.id);  // 只按 id 比
+            }
+        };
+
+        TreeMap<EvilKey, String> map = new TreeMap<>(byId);
+
+        map.put(new EvilKey(1), "a");
+        map.put(new EvilKey(2), "b");
+        map.put(new EvilKey(3), "c");
+
+        return map.size();
     }
 
     // ==================================================================
@@ -68,7 +96,28 @@ public class TreeMapDeepen {
     //   null 调不了任何方法，所以 NPE。这是 TreeMap 和 HashMap 最大的行为差异之一。
     // ==================================================================
     static boolean[] treeMapNullKey() {
-        throw new UnsupportedOperationException("TODO 3");
+        boolean[] result = new boolean[2];
+
+        // [0]：自然排序的 TreeMap，key 为 null → 要调 compareTo，NPE
+        try {
+            TreeMap<EvilKey, String> natural = new TreeMap<>();
+            natural.put(null, "x");
+            result[0] = false;  // 没抛异常才算 false，但实际会抛
+        } catch (NullPointerException e) {
+            result[0] = true;   // 抛了 NPE
+        }
+
+        // [1]：带 Comparator.nullsFirst 的 TreeMap，null 有专门规则 → 成功
+        try {
+            TreeMap<EvilKey, String> withNull = new TreeMap<>(Comparator.nullsFirst(
+                    Comparator.naturalOrder()));
+            withNull.put(null, "x");
+            result[1] = true;   // put 成功
+        } catch (RuntimeException e) {
+            result[1] = false;
+        }
+
+        return result;   // {true, true}
     }
 
     // ==================================================================
@@ -92,7 +141,10 @@ public class TreeMapDeepen {
     // 旋转是「不改中序遍历顺序、只改树形」的唯一手段 —— 这就是下面第 7、8 条断言要验的事。
     // ==================================================================
     static TreeNode rotateLeft(TreeNode root) {
-        throw new UnsupportedOperationException("TODO 4");
+        TreeNode newRoot = root.right;
+        root.right = newRoot.left;
+        newRoot.left = root;
+        return newRoot;
     }
 
     /** 给你用的右旋，写完左旋自己对照一下就知道两边是对称的。 */
