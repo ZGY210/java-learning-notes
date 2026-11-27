@@ -29,7 +29,11 @@ public class VarargsCollectionsDemo {
     // 也正因如此，你**不能**同时写 sum(int... nums) 和 sum(int[] nums) —— 它们是同一个签名，编译报错。
     // ==================================================================
     static int sum(int... nums) {
-        throw new UnsupportedOperationException("TODO 1");
+        int total = 0;
+        for (int n : nums) {
+            total += n;
+        }
+        return total;
     }
 
     // ==================================================================
@@ -42,7 +46,11 @@ public class VarargsCollectionsDemo {
     // 所以「至少要有一个」这种约束，只能靠「前面写一个固定参数」来表达。
     // ==================================================================
     static int max(int first, int... rest) {
-        throw new UnsupportedOperationException("TODO 2");
+        int  max = first;
+        for (int n : rest) {
+            max = Math.max(max, n);
+        }
+        return max;
     }
 
     // ==================================================================
@@ -59,7 +67,15 @@ public class VarargsCollectionsDemo {
     //   这两个不是一回事。
     // ==================================================================
     static boolean listOfIsImmutable() {
-        throw new UnsupportedOperationException("TODO 3");
+        List<String> list = List.of("a");
+        try {
+            list.add("b");
+            // 没抛异常 → 说明可修改 → 不是不可变集合
+            return false;
+        } catch (UnsupportedOperationException e) {
+            // 抛了异常 → 说明不可变
+            return true;
+        }
     }
 
     // ==================================================================
@@ -73,7 +89,9 @@ public class VarargsCollectionsDemo {
     // 这一题练的是「不可变集合传进工具方法时的防御性拷贝」—— 真实项目里天天遇到。
     // ==================================================================
     static List<String> sortCopy(List<String> src) {
-        throw new UnsupportedOperationException("TODO 4");
+        List<String> dest = new ArrayList<>(src);
+        Collections.sort(dest);
+        return dest;
     }
 
     // ==================================================================
@@ -87,7 +105,11 @@ public class VarargsCollectionsDemo {
     //   → 写进 notes/18 的问题里。
     // ==================================================================
     static int maxFrequency(List<String> words) {
-        throw new UnsupportedOperationException("TODO 5");
+        int max = 0;
+        for (String word : words) {
+            max = Math.max(max, Collections.frequency(words, word));
+        }
+        return max;
     }
 
     // ==================================================================
